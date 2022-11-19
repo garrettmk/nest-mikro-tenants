@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@nest-mikro-tenants/core/domain": ["libs/core/domain/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
