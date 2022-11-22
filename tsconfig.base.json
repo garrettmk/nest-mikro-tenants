@@ -16,6 +16,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@nest-mikro-tenants/backend/factories": [
+        "libs/backend/factories/src/index.ts"
+      ],
       "@nest-mikro-tenants/core/domain": ["libs/core/domain/src/index.ts"]
     }
   },
