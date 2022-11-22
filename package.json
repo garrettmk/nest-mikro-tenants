@@ -9,9 +9,16 @@
   },
   "private": true,
   "dependencies": {
+    "@garrettmk/class-schema": "file:../class-schema/dist/packages/class-schema",
+    "@garrettmk/metadata-actions": "file:../class-schema/dist/packages/metadata-actions",
+    "@garrettmk/metadata-manager": "file:../class-schema/dist/packages/metadata-manager",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "class-transformer": "^0.5.1",
+    "class-transformer-validator": "^0.9.1",
+    "class-validator": "^0.13.2",
+    "cuid": "^2.1.8",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0",
     "tslib": "^2.3.0"
