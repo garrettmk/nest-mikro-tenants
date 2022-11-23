@@ -1,1 +1,1 @@
-export * from './lib/core-common';
+export * from './lib/set-class-name.util';

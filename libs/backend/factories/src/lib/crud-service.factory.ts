@@ -5,7 +5,7 @@ import { AutoPath } from "@mikro-orm/core/typings";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityRepository } from "@mikro-orm/postgresql";
 import { instanceToPlain } from "class-transformer";
-import { setClassName } from "libs/core/factories/src/lib/util/set-class-name.util";
+import { setClassName } from "@nest-mikro-tenants/core/common";
 
 
 export type FindOptions<T> = {

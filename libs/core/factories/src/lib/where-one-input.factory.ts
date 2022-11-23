@@ -3,7 +3,7 @@ import {
   Constraints,
   Constructor,
 } from '@garrettmk/class-schema';
-import { setClassName } from './util/set-class-name.util';
+import { setClassName } from '../../../common/src/lib/set-class-name.util';
 import { ObjectFilterInput } from './object-filter-input.factory';
 
 export type WhereOneInput<T extends object, K extends keyof T = keyof T> = {

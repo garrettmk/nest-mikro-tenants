@@ -7,7 +7,7 @@ import {
   Values,
   optional,
 } from '@garrettmk/class-schema';
-import { setClassName } from './util/set-class-name.util';
+import { setClassName } from '../../../common/src/lib/set-class-name.util';
 
 export function EnumFilterInput<EnumObject extends Enum>(
   enumObject: EnumObject,

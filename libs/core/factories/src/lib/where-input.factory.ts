@@ -4,7 +4,7 @@ import {
   optional,
   Property,
 } from '@garrettmk/class-schema';
-import { setClassName } from './util/set-class-name.util';
+import { setClassName } from '../../../common/src/lib/set-class-name.util';
 
 export type WhereInput<
   T extends object,
