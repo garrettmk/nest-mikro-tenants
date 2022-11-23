@@ -1,21 +1,21 @@
 {
-  "name": "backend-factories",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/backend/factories/src",
+  "name": "core-factories",
+  "sourceRoot": "libs/core/factories/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/backend/factories/**/*.ts"]
+        "lintFilePatterns": ["libs/core/factories/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/backend/factories/jest.config.ts",
+        "jestConfig": "libs/core/factories/jest.config.ts",
         "passWithNoTests": true
       }
     }
