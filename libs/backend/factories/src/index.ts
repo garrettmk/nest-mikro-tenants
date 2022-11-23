@@ -1,1 +1,1 @@
-export * from './lib/backend-factories';
+export * from './lib/crud-service.factory';
