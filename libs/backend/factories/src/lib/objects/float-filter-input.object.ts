@@ -1,6 +1,6 @@
 import { BaseObject, Float, NumberConstraints, Property, optional } from "@garrettmk/class-schema";
 
-export class IntFilterInput extends BaseObject implements NumberConstraints {
+export class FloatFilterInput extends BaseObject implements NumberConstraints {
     @Property(() => Float, { optional })
     min?: number;
 
