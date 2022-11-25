@@ -1,5 +1,6 @@
 import { CreateInput, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories"
-import { BaseModel, Constructor, BaseObjectConstructor, Id } from "@garrettmk/class-schema"
+import { BaseModel, BaseObjectConstructor, Id } from "@garrettmk/class-schema"
+import { Constructor } from "@garrettmk/ts-utils";
 import { FilterQuery, RequiredEntityData, EntityData } from '@mikro-orm/core';
 import { AutoPath } from "@mikro-orm/core/typings";
 import { InjectRepository } from "@mikro-orm/nestjs";
