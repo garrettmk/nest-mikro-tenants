@@ -5,6 +5,8 @@ export * from './lib/where-one-input.factory';
 export * from './lib/enum-filter-input.factory';
 export * from './lib/object-filter-input.factory';
 export * from './lib/paginated.factory';
+export * from './lib/pick.factory';
+export * from './lib/omit.factory';
 
 export * from './lib/objects/boolean-filter-input.object';
 export * from './lib/objects/date-filter-input.object';

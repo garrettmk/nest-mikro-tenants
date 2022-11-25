@@ -1,81 +1,83 @@
 import {
   BaseObject,
   BaseObjectConstructor,
-  ClassContext,
-  Constraints,
-  Constructor,
-  getTypeInfo,
-  isArrayField,
+  ClassContext, innerType,
+  input,
+  ObjectConstraints,
   PropertiesMetadata,
   PropertiesMetadataManager,
-  PropertyMetadata,
+  PropertyMetadata
 } from '@garrettmk/class-schema';
-import {
-  applyActions,
-  applyActionsToProperties,
-  ifMetadata,
-  MetadataAction,
-  PropertyContext,
-  updateMetadata,
-} from '@garrettmk/metadata-actions';
+import { applyActions, applyActionsToProperties, ifMetadata, PropertyContext } from '@garrettmk/metadata-actions';
 import { MetadataKey } from '@garrettmk/metadata-manager';
-import {
-  FilterTypesRegistry,
-  isFilterableField,
-} from './registries/filter-types.registry';
+import { Constructor } from '@garrettmk/ts-utils';
+import { FilterTypesRegistry, isFilterableField } from './registries/filter-types.registry';
 import { omitProperties } from './util/omit-properties';
+import { substituteType } from './util/substitute-type.util';
 
-export type ObjectFilterInput<
-  T extends object,
-  K extends keyof T = keyof T
-> = Pick<T, K>;
+
+export type ObjectFilterInputOptions = {
+  name?: string
+  description?: string
+};
 
 export function ObjectFilterInput<T extends object>(
-  objectType: Constructor<T>
-): BaseObjectConstructor<Constraints<T>> {
-  const objectPropertiesMetadata =
-    PropertiesMetadataManager.getMetadata(objectType);
-  const context: ClassContext = { target: objectType };
-  const name = `${objectType.name}FilterInput`;
-  const omitted: MetadataKey[] = [];
-  const addToOmittedList: MetadataAction<PropertyMetadata, PropertyContext> = (
-    _,
-    context
-  ) => {
-    omitted.push(context.propertyKey);
-  };
-  const removeOmittedFields: MetadataAction<PropertiesMetadata> = (metadata) =>
-    omitProperties(metadata, omitted);
+  objectType: Constructor<T>,
+  options?: ObjectFilterInputOptions
+): BaseObjectConstructor<ObjectConstraints<T>> {
+  const { name, description } = optionsWithDefaults(options, objectType);
 
-  const propertiesMetadata = applyActions(objectPropertiesMetadata, context, [
-    applyActionsToProperties([
-      ifMetadata(
-        isFilterableField,
-        [
-          updateMetadata((meta) => ({
-            type: isArrayField(meta)
-              ? () => [
-                  FilterTypesRegistry.getFilterType(
-                    getTypeInfo(meta.type).innerType as Constructor
-                  ),
-                ]
-              : () =>
-                  FilterTypesRegistry.getFilterType(
-                    getTypeInfo(meta.type).type as Constructor
-                  ),
-          })),
-        ],
-        [addToOmittedList]
-      ),
-    ]),
-    removeOmittedFields,
-  ]);
-
-  const filterType = BaseObject.createClass<Constraints<T>>({
+  const filterType = BaseObject.createClass<ObjectConstraints<T>>({
     name,
-    propertiesMetadata,
+    classMetadata: {
+      input,
+      description,
+    },
+    propertiesMetadata: toObjectFilterMetadata(objectType),
   });
-  FilterTypesRegistry.setMetadata(objectType, { filterType });
+
+  FilterTypesRegistry.setFilterType(objectType, filterType);
 
   return filterType;
+}
+
+function optionsWithDefaults(
+  options: ObjectFilterInputOptions | undefined,
+  objectType: Constructor
+): Required<ObjectFilterInputOptions> {
+  return {
+    name: options?.name ?? `${objectType.name}FilterInput`,
+    description: options?.description ?? `DTO for filtering ${objectType.name} objects`,
+  };
+}
+
+function toObjectFilterMetadata(target: Constructor): PropertiesMetadata {
+  const targetPropertiesMeta = PropertiesMetadataManager.getMetadata(target);
+  const targetContext: ClassContext = { target };
+  const { addToOmittedList, removeOmittedFields } = omitFieldsActions();
+
+  return applyActions(targetPropertiesMeta, targetContext, [
+    applyActionsToProperties(
+      ifMetadata(
+        isFilterableField,
+        substituteType((meta) => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor)),
+        addToOmittedList
+      )
+    ),
+    removeOmittedFields,
+  ]);
+}
+
+function omitFieldsActions() {
+  const omitted: MetadataKey[] = [];
+
+  return {
+    addToOmittedList(metadata: PropertyMetadata, context: PropertyContext) {
+      omitted.push(context.propertyKey);
+    },
+
+    removeOmittedFields(metadata: PropertiesMetadata) {
+      return omitProperties(metadata, omitted);
+    },
+  };
 }

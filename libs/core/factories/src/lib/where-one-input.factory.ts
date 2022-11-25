@@ -1,36 +1,65 @@
-import {
-  BaseObjectConstructor,
-  Constraints,
-  Constructor,
-} from '@garrettmk/class-schema';
-import { setClassName } from '../../../common/src/lib/set-class-name.util';
-import { ObjectFilterInput } from './object-filter-input.factory';
+import { BaseObjectConstructor, input, ObjectConstraints } from '@garrettmk/class-schema';
+import { Constructor } from '@garrettmk/ts-utils';
 
-export type WhereOneInput<T extends object, K extends keyof T = keyof T> = {
-  [k in K]?: Constraints<T[k]>;
-};
 
+/**
+ * WhereOneInput is a subset of the object's constraints filter.
+ */
+export type WhereOneInput<T extends object, K extends keyof T = keyof T> = ObjectConstraints<T, K>;
+
+/**
+ * Options for creating a WhereOneInput.
+ */
 export type WhereOneInputOptions = {
-  name?: string;
+  name?: string
+  description?: string
 };
 
+/**
+ * Creates and returns a new class, implementing the WhereOneInput interface
+ * for the given object type.
+ * 
+ * @param objectType 
+ * @param filterType 
+ * @param options 
+ * @returns 
+ */
 export function WhereOneInput<
   T extends object,
   K extends keyof T = keyof T,
-  F extends ObjectFilterInput<T, K> = ObjectFilterInput<T, K>
+  F extends ObjectConstraints<T> = ObjectConstraints<T>
 >(
   objectType: Constructor<T>,
-  filterType: Constructor<F>,
+  filterType: BaseObjectConstructor<F>,
   options?: WhereOneInputOptions
 ): BaseObjectConstructor<WhereOneInput<T, K>> {
-  const name = options?.name ?? `${objectType.name}WhereOneInput`;
+  const { name, description } = optionsWithDefaults(options, objectType);
 
-  // @ts-expect-error class members not statically known
-  class GeneratedWhereOneInputClass extends filterType {}
+  const whereOneType = filterType.createClass<WhereOneInput<T, K>>({
+    name,
+    classMetadata: {
+      input,
+      description
+    }
+  });
+  
+  return whereOneType;
+}
 
-  setClassName(GeneratedWhereOneInputClass, name);
+/**
+ * @internal
+ * 
+ * Return the options object with default values filled in.
+ * 
+ * @param options 
+ * @param objectType 
+ * @returns An options object with all values set
+ */
+function optionsWithDefaults(options: WhereOneInputOptions | undefined, objectType: Constructor): Required<WhereOneInputOptions> {
+  const {
+    name = `${objectType.name}WhereOneInput`,
+    description = `Query object for finding a unique ${objectType.name}`
+  } = options ?? {};
 
-  return GeneratedWhereOneInputClass as unknown as BaseObjectConstructor<
-    WhereOneInput<T, K>
-  >;
+  return { name, description };
 }

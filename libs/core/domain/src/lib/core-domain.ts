@@ -1,4 +1,4 @@
-import { BaseModel, BaseObjectType, Id, optional, Property, unique } from '@garrettmk/class-schema';
+import { BaseModel, Class, Id, optional, Property, unique, output, entity } from '@garrettmk/class-schema';
 
 export enum EventType {
   Create = 'CREATE',
@@ -7,7 +7,7 @@ export enum EventType {
 }
 
 
-@BaseObjectType()
+@Class({ output, entity })
 export class Event extends BaseModel {
   @Property(() => Id)
   objectId!: string;
@@ -22,27 +22,8 @@ export class Event extends BaseModel {
   createdAt!: Date;
 }
 
-export class User extends BaseModel {
-  @Property(() => String, { unique, minLength: 2 })
-  username!: string;
 
-  @Property(() => String)
-  password!: string;
-
-  @Property(() => String, { unique })
-  email!: string;
-
-  @Property(() => String, { optional, minLength: 2 })
-  nickname?: string;
-
-  @Property(() => Date)
-  createdAt!: Date;
-
-  @Property(() => Date)
-  updatedAt!: Date;
-}
-
-
+@Class({ output, entity })
 export class Tenant extends BaseModel {
   @Property(() => String, { unique })
   slug!: string;

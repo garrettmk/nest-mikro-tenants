@@ -2,10 +2,12 @@ import {
   BaseModel,
   BaseObject,
   BaseObjectConstructor,
-  Constructor,
+  ClassMetadata,
   PropertiesMetadataManager,
+  input
 } from '@garrettmk/class-schema';
 import { MetadataKeys } from '@garrettmk/metadata-manager';
+import { Constructor } from '@garrettmk/ts-utils';
 import { omitProperties } from './util/omit-properties';
 import { requireProperties } from './util/require-properties';
 import { Require } from './util/types';
@@ -37,9 +39,10 @@ export type UpdateInputOptions<
   Required extends MetadataKeys<UpdatableFields<Model>> = never,
   Omitted extends MetadataKeys<UpdatableFields<Model>> = never
 > = {
-  required?: Required[];
-  omitted?: Omitted[];
-  name?: string;
+  required?: Required[]
+  omitted?: Omitted[]
+  name?: string
+  description?: string
 };
 
 /**
@@ -60,14 +63,19 @@ export function UpdateInput<
     required = [],
     omitted = [],
     name = `${modelType.name}UpdateInput`,
+    description = `DTO for updating ${modelType.name} models`
   } = options ?? {};
 
-  const modelPropertiesMetadata =
-    PropertiesMetadataManager.getMetadata(modelType);
+  const classMetadata: ClassMetadata = { input, description };
+  const modelPropertiesMetadata = PropertiesMetadataManager.getMetadata(modelType);
   const propertiesMetadata = omitProperties(
     requireProperties(modelPropertiesMetadata, required),
     ['id', ...omitted]
   );
 
-  return BaseObject.createClass({ name, propertiesMetadata });
+  return BaseObject.createClass({
+    name,
+    classMetadata,
+    propertiesMetadata
+  });
 }

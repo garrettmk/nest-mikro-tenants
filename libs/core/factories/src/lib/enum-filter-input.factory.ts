@@ -1,30 +1,41 @@
-import {
-  BaseObject,
-  BaseObjectConstructor,
-  Enum,
-  EnumConstraints,
-  Property,
-  Values,
-  optional,
-} from '@garrettmk/class-schema';
-import { setClassName } from '../../../common/src/lib/set-class-name.util';
+import { BaseObject, BaseObjectConstructor, Enum, EnumConstraints, input, optional } from '@garrettmk/class-schema';
+
+export type EnumFilterOptions = {
+  name?: string;
+  description?: string;
+};
 
 export function EnumFilterInput<EnumObject extends Enum>(
   enumObject: EnumObject,
-  name: string
+  name: string,
+  options?: EnumFilterOptions
 ): BaseObjectConstructor<EnumConstraints<EnumObject>> {
-  class GeneratedEnumFilterClass
-    extends BaseObject
-    implements EnumConstraints<EnumObject>
-  {
-    @Property(() => [enumObject as Enum], { optional })
-    in?: Values<EnumObject>[];
+  const { description, name: _name } = optionsWithDefaults(options, name);
 
-    @Property(() => [enumObject as Enum], { optional })
-    nin?: Values<EnumObject>[];
-  }
+  const filterType = BaseObject.createClass<EnumConstraints<EnumObject>>({
+    name: _name,
+    classMetadata: {
+      input,
+      description,
+    },
+    propertiesMetadata: {
+      in: {
+        type: () => [enumObject],
+        optional,
+      },
+      nin: {
+        type: () => [enumObject],
+        optional,
+      },
+    },
+  });
 
-  setClassName(GeneratedEnumFilterClass, name);
+  return filterType;
+}
 
-  return GeneratedEnumFilterClass;
+function optionsWithDefaults(options: EnumFilterOptions | undefined, name: string): Required<EnumFilterOptions> {
+  return {
+    name: `${name}FilterInput`,
+    description: `DTO for filtering ${name} values`,
+  };
 }

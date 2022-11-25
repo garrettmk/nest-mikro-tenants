@@ -1,15 +1,7 @@
-import {
-  Constraints,
-  Constructor,
-  optional,
-  Property,
-} from '@garrettmk/class-schema';
-import { setClassName } from '../../../common/src/lib/set-class-name.util';
+import { BaseObjectConstructor, ObjectConstraints, input, optional } from '@garrettmk/class-schema';
+import { Constructor } from '@garrettmk/ts-utils';
 
-export type WhereInput<
-  T extends object,
-  F extends Constraints<T> = Constraints<T>
-> = Constraints<T> & {
+export type WhereInput<T extends object, F extends ObjectConstraints<T> = ObjectConstraints<T>> = ObjectConstraints<T> & {
   _and?: F[];
   _or?: F[];
   _not?: F[];
@@ -17,34 +9,47 @@ export type WhereInput<
 
 export type WhereInputOptions = {
   name?: string;
+  description?: string;
 };
 
-export function WhereInput<
-  T extends object,
-  F extends Constraints<T> = Constraints<T>
->(
+export function WhereInput<T extends object, F extends ObjectConstraints<T> = ObjectConstraints<T>>(
   objectType: Constructor<T>,
-  filterType: Constructor<F>,
+  filterType: BaseObjectConstructor<F>,
   options?: WhereInputOptions
-): Constructor<WhereInput<T, F>> {
-  const name = options?.name ?? `${objectType.name}WhereInput`;
+): BaseObjectConstructor<WhereInput<T, F>> {
+  const { name, description } = optionsWithDefaults(options, objectType);
 
-  // @ts-expect-error class members not statically known
-  class GeneratedWhereInputClass
-    extends filterType
-    implements WhereInput<T, F>
-  {
-    @Property(() => [filterType], { optional })
-    _and?: F[];
+  const whereType = filterType.createClass<WhereInput<T, F>>({
+    name,
+    classMetadata: {
+      input, 
+      description
+    },
+    propertiesMetadata: {
+      _and: { type: () => [filterType], optional },
+      _or: { type: () => [filterType], optional },
+      _not: { type: () => [filterType], optional }
+    }
+  });
 
-    @Property(() => [filterType], { optional })
-    _or?: F[];
+  return whereType;
+}
 
-    @Property(() => [filterType], { optional })
-    _not?: F[];
-  }
 
-  setClassName(GeneratedWhereInputClass, name);
+/**
+ * @internal
+ * 
+ * Return the options object with default values filled in.
+ * 
+ * @param options 
+ * @param objectType 
+ * @returns An options object with all values set
+ */
+ function optionsWithDefaults(options: WhereInputOptions | undefined, objectType: Constructor): Required<WhereInputOptions> {
+  const {
+    name = `${objectType.name}WhereInput`,
+    description = `Query object for finding ${objectType.name} objects`
+  } = options ?? {};
 
-  return GeneratedWhereInputClass as Constructor<WhereInput<T, F>>;
+  return { name, description };
 }
