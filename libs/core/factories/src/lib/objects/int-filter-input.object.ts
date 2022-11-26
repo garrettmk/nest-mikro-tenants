@@ -4,8 +4,11 @@ import {
   NumberConstraints,
   Property,
   optional,
+  Class,
+  input
 } from '@garrettmk/class-schema';
 
+@Class({ input })
 export class IntFilterInput extends BaseObject implements NumberConstraints {
   @Property(() => Int, { optional })
   min?: number;

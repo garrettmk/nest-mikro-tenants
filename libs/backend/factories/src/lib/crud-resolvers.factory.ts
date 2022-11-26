@@ -1,4 +1,5 @@
-import { BaseModel, Constructor } from "@garrettmk/class-schema";
+import { BaseModel } from "@garrettmk/class-schema";
+import { Constructor } from "@garrettmk/ts-utils";
 import { setClassName } from "@nest-mikro-tenants/core/common";
 import { CreateInput, Paginated, PaginationInput, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
 import { Args, ID as GqlId, Info, Int as GqlInt, Mutation, Query, ObjectType as GqlObjectType } from '@nestjs/graphql';
@@ -87,14 +88,10 @@ export function CrudResolvers<
     updateInput: Constructor<U>,
     whereInput: Constructor<W>,
     whereOneInput: Constructor<W1>,
+    paginated: Constructor<Paginated<T>>,
     single: Single = entity.name as Single,
     plural: Plural = `${entity.name}s` as Plural
 ): Constructor<CrudResolvers<T, C, U, W, W1, S, Single, Plural>> {
-
-    const PaginatedEntities = Paginated(entity);
-    setClassName(PaginatedEntities, `Paginated${plural}`);
-    GqlObjectType()(PaginatedEntities);
-
     class GeneratedCrudResolvers implements CrudResolvers<T, C, U, W, W1, S, Single, Plural> {
         constructor(protected readonly service: S) {}
 
@@ -146,13 +143,13 @@ export function CrudResolvers<
           return this.service.findOne(where, { populate });
         }
     
-        @Query(() => PaginatedEntities)
+        @Query(() => paginated)
         async [`findMany${plural}`](
           @Args('where', { type: () => whereInput, nullable: true }) where: W,
           @Args('groupBy', { type: () => String, nullable: true }) groupBy: string[],
           @Args('paginate', { type: () => PaginationInput, nullable: true }) paginate: PaginationInput = defaultPagination,
           @Info() info: GraphQLResolveInfo
-        ): Promise<PaginatedEntities> {
+        ): Promise<Paginated<T>> {
           const populate = fieldsToRelations(info, { root: 'items' });
           const pagination = instanceToPlain(paginate, { exposeUnsetFields: false });
           const groupByPlain = groupBy ? { groupBy } : {};

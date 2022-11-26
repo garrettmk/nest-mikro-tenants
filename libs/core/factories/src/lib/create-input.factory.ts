@@ -66,8 +66,8 @@ export function CreateInput<
 
   return BaseObject.createClass({
     name,
-    propertiesMetadata,
     classMetadata,
+    propertiesMetadata,
   });
 }
 

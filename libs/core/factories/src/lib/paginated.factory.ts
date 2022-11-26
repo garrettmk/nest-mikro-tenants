@@ -1,9 +1,6 @@
 import {
   BaseObject,
-  BaseObjectConstructor,
-  Property,
-  output,
-  Class
+  BaseObjectConstructor, output
 } from '@garrettmk/class-schema';
 import { Constructor } from '@garrettmk/ts-utils';
 import { Pagination } from './objects/pagination.object';
@@ -13,17 +10,43 @@ export type Paginated<T> = {
   items: T[];
 };
 
+export type PaginatedOptions = {
+  name?: string
+  description?: string
+}
+
 export function Paginated<Obj extends BaseObject>(
-  objectType: Constructor<Obj>
+  objectType: Constructor<Obj>,
+  options?: PaginatedOptions
 ): BaseObjectConstructor<Paginated<Obj>> {
-  @Class({ output, description: `A paginated list of ${objectType.name} objects`})
-  class GeneratedPaginatedClass extends BaseObject implements Paginated<Obj> {
-    @Property(() => Pagination)
-    pagination!: Pagination;
+  const { name, description } = optionsWithDefaults(options, objectType);
 
-    @Property(() => [objectType])
-    items!: Obj[];
-  }
+  return BaseObject.createClass<Paginated<Obj>>({
+    name,
+    classMetadata: {
+      output,
+      description
+    },
+    propertiesMetadata: {
+      pagination: {
+        type: () => Pagination
+      },
+      items: {
+        type: () => [objectType]
+      }
+    }
+  });
+}
 
-  return GeneratedPaginatedClass;
+
+function optionsWithDefaults(options: PaginatedOptions | undefined, objectType: Constructor): Required<PaginatedOptions> {
+  const {
+    name = `Paginated${objectType.name}s`,
+    description = `A paginated list of ${objectType.name} objects`
+  } = options ?? {};
+
+  return {
+    name,
+    description
+  };
 }

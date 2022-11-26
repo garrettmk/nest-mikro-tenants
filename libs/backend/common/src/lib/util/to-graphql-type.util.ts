@@ -11,6 +11,7 @@ export function toGraphQlType(typeFn: TypeFn<MaybeArray<Constructor>>) {
             case Int: return GqlInt;
             case Float: return GqlFloat;
             case Id: return GqlId;
+            case RegExp: return String;
             default: throw new Error(`No mapped type for ${innerType}`);
         }
     };

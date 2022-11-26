@@ -4,8 +4,11 @@ import {
   StringConstraints,
   optional,
   Int,
+  Class,
+  input
 } from '@garrettmk/class-schema';
 
+@Class({ input })
 export class StringFilterInput extends BaseObject implements StringConstraints {
   @Property(() => RegExp, { optional })
   matches?: RegExp;

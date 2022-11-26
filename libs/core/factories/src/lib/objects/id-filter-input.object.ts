@@ -4,8 +4,11 @@ import {
   IdConstraints,
   Property,
   optional,
+  Class,
+  input
 } from '@garrettmk/class-schema';
 
+@Class({ input })
 export class IdFilterInput extends BaseObject implements IdConstraints {
   @Property(() => Id, { optional })
   eq?: Id;

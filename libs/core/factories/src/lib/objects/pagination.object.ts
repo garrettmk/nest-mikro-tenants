@@ -1,6 +1,7 @@
-import { Int, Property } from '@garrettmk/class-schema';
+import { Class, Int, Property, output } from '@garrettmk/class-schema';
 import { PaginationInput } from './pagination-input.object';
 
+@Class({ output })
 export class Pagination extends PaginationInput {
   @Property(() => Int, { min: 0 })
   total!: number;

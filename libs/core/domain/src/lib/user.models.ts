@@ -1,5 +1,5 @@
-import { BaseModel, Class, entity, optional, output, Property, unique } from "@garrettmk/class-schema";
-import { Pick, CreateInput, ObjectFilterInput, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
+import { BaseModel, Class, entity, optional, input, output, Property, unique } from "@garrettmk/class-schema";
+import { Pick, CreateInput, ObjectFilterInput, UpdateInput, WhereInput, WhereOneInput, Paginated } from "@nest-mikro-tenants/core/factories";
 
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
@@ -23,21 +23,29 @@ export class User extends BaseModel {
 }
 
 
+@Class({ input })
 export class UserCreateInput extends CreateInput(User, {
   required: ['username', 'email', 'password'],
   omitted: ['createdAt', 'updatedAt'],
 }) {}
 
-
+@Class({ input })
 export class UserUpdateInput extends UpdateInput(User, {
   omitted: ['createdAt', 'updatedAt'],
 }) {}
 
 
+@Class({ input })
 export class UserFilterInput extends ObjectFilterInput(User) {}
 
+@Class({ input })
 export class UserFilterOneInput extends Pick(UserFilterInput, ['id', 'username', 'email']) {}
 
+@Class({ input })
 export class UsersWhereInput extends WhereInput(User, UserFilterInput) {}
 
+@Class({ input })
 export class UsersWhereOneInput extends WhereOneInput(User, UserFilterOneInput) {}
+
+@Class({ output })
+export class PaginatedUsers extends Paginated(User) {}
