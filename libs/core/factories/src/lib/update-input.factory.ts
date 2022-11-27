@@ -4,11 +4,13 @@ import {
   BaseObjectConstructor,
   ClassMetadata,
   PropertiesMetadataManager,
-  input
+  input,
+  PropertiesMetadata,
+  omitProperties
 } from '@garrettmk/class-schema';
-import { MetadataKeys } from '@garrettmk/metadata-manager';
+import { applyActions, applyActionsToProperties, updateMetadata } from '@garrettmk/metadata-actions';
+import { MetadataKeys, MetadataKey } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
-import { omitProperties } from './util/omit-properties';
 import { requireProperties } from './util/require-properties';
 import { Require } from './util/types';
 
@@ -59,23 +61,63 @@ export function UpdateInput<
   modelType: Constructor<Model>,
   options?: UpdateInputOptions<Model, Required, Omitted>
 ): BaseObjectConstructor<UpdateInput<Model, Required, Omitted>> {
-  const {
-    required = [],
-    omitted = [],
-    name = `${modelType.name}UpdateInput`,
-    description = `DTO for updating ${modelType.name} models`
-  } = options ?? {};
-
-  const classMetadata: ClassMetadata = { input, description };
+  const { required, omitted, name, description } = optionsWithDefaults(options, modelType);
   const modelPropertiesMetadata = PropertiesMetadataManager.getMetadata(modelType);
-  const propertiesMetadata = omitProperties(
-    requireProperties(modelPropertiesMetadata, required),
-    ['id', ...omitted]
-  );
 
   return BaseObject.createClass({
     name,
-    classMetadata,
-    propertiesMetadata
+    classMetadata: {
+      input,
+      description
+    },
+    propertiesMetadata: toUpdateInputProperties(modelPropertiesMetadata, required, omitted)
   });
+}
+
+/**
+ * @internal
+ *
+ * Return the options object with default values filled in.
+ *
+ * @param options
+ * @param objectType
+ * @returns An options object with all values set
+ */
+ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<UpdatableFields<M>> = never, O extends MetadataKeys<UpdatableFields<M>> = never>(
+  options: UpdateInputOptions<M, R, O> | undefined,
+  objectType: Constructor
+): Required<UpdateInputOptions<M, R, O>> {
+  const {
+    required = [],
+    omitted = [],
+    name = `${objectType.name}UpdateInput`,
+    description = `DTO for updating ${objectType.name} models`,
+  } = options ?? {};
+
+  return {
+    required,
+    omitted,
+    name,
+    description,
+  };
+}
+
+/**
+ * @internal
+ *
+ * @param metadata
+ * @param required
+ * @param omitted
+ * @returns
+ */
+ function toUpdateInputProperties(metadata: PropertiesMetadata, required: MetadataKey[], omitted: MetadataKey[]): PropertiesMetadata {
+  const properties = applyActions(metadata, {}, [
+    omitProperties(...omitted),
+    applyActionsToProperties(updateMetadata((meta, ctx) => ({
+      optional: !required.includes(ctx.propertyKey),
+      hidden: required.includes(ctx.propertyKey) ? false : meta.hidden
+    }))),
+  ]);
+
+  return properties;
 }

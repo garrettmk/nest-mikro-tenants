@@ -1,15 +1,13 @@
 import {
   BaseModel,
   BaseObject,
-  BaseObjectConstructor,
-  ClassMetadata,
-  PropertiesMetadataManager,
-  input,
+  BaseObjectConstructor, input, makePropertiesOptional,
+  makePropertiesRequired,
+  omitProperties, PropertiesMetadata, PropertiesMetadataManager
 } from '@garrettmk/class-schema';
-import { MetadataKeys } from '@garrettmk/metadata-manager';
+import { applyActions, applyActionsToProperties, updateMetadata } from '@garrettmk/metadata-actions';
+import { MetadataKey, MetadataKeys } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
-import { omitProperties } from './util/omit-properties';
-import { requireProperties } from './util/require-properties';
 import { Require } from './util/types';
 
 
@@ -60,14 +58,15 @@ export function CreateInput<
   options?: CreateInputOptions<Model, Required, Omitted>
 ): BaseObjectConstructor<CreateInput<Model, Required, Omitted>> {
   const { required, omitted, name, description } = optionsWithDefaults(options, modelType);
-  const classMetadata: ClassMetadata = { input, description };
   const modelPropertiesMetadata = PropertiesMetadataManager.getMetadata(modelType);
-  const propertiesMetadata = omitProperties(requireProperties(modelPropertiesMetadata, required), omitted);
 
   return BaseObject.createClass({
     name,
-    classMetadata,
-    propertiesMetadata,
+    classMetadata: {
+      input,
+      description
+    },
+    propertiesMetadata: toCreateInputProperties(modelPropertiesMetadata, required, omitted)
   });
 }
 
@@ -97,4 +96,24 @@ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<M> = ne
     name,
     description,
   };
+}
+
+/**
+ * @internal
+ *
+ * @param metadata
+ * @param required
+ * @param omitted
+ * @returns
+ */
+function toCreateInputProperties(metadata: PropertiesMetadata, required: MetadataKey[], omitted: MetadataKey[]): PropertiesMetadata {
+  const properties = applyActions(metadata, {}, [
+    omitProperties(...omitted),
+    applyActionsToProperties(updateMetadata((meta, ctx) => ({
+      optional: !required.includes(ctx.propertyKey),
+      hidden: required.includes(ctx.propertyKey) ? false : meta.hidden
+    }))),
+  ]);
+
+  return properties;
 }

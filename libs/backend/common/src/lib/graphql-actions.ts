@@ -1,4 +1,4 @@
-import { applyActionsToPropertyMetadata, ClassContext, ClassMetadata, ClassPropertyContext, decorateClassWith, decoratePropertyWith, Float, Id, innerTypeMatches, input, Int, output, PropertyMetadata } from "@garrettmk/class-schema";
+import { hidden, applyActionsToPropertyMetadata, ClassContext, ClassMetadata, ClassPropertyContext, decorateClassWith, decoratePropertyWith, Float, Id, innerTypeMatches, input, Int, output, PropertyMetadata, and, not } from "@garrettmk/class-schema";
 import { ifMetadata, matchesMetadata, MetadataAction } from "@garrettmk/metadata-actions";
 import { Constructor } from '@garrettmk/ts-utils';
 import { Field, InputType as GqlInputType, ObjectType as GqlObjectType, ReturnTypeFunc } from '@nestjs/graphql';
@@ -7,19 +7,24 @@ import { toGraphQlType } from './util/to-graphql-type.util';
 
 export const graphqlPropertyActions: MetadataAction<PropertyMetadata, ClassPropertyContext>[] = [
     ifMetadata(
-        innerTypeMatches<Constructor>(Int, Float, Id, RegExp), [
-            decoratePropertyWith(meta =>
-                Field(toGraphQlType(meta.type), {
-                    nullable: meta.optional,
-                    description: meta.description,
-                })
-            )
-        ], [
-            decoratePropertyWith(meta =>
-                Field(meta.type as ReturnTypeFunc, {
-                    nullable: meta.optional,
-                    description: meta.description
-                })
+        not(matchesMetadata({ hidden })),
+        [
+            ifMetadata(
+                innerTypeMatches<Constructor>(Int, Float, Id, RegExp), [
+                    decoratePropertyWith(meta =>
+                        Field(toGraphQlType(meta.type), {
+                            nullable: meta.optional,
+                            description: meta.description,
+                        })
+                    )
+                ], [
+                    decoratePropertyWith(meta =>
+                        Field(meta.type as ReturnTypeFunc, {
+                            nullable: meta.optional,
+                            description: meta.description
+                        })
+                    )
+                ]
             )
         ]
     )
@@ -28,20 +33,27 @@ export const graphqlPropertyActions: MetadataAction<PropertyMetadata, ClassPrope
 
 export const graphqlClassActions: MetadataAction<ClassMetadata, ClassContext>[] = [
     ifMetadata(
-        matchesMetadata({ output }), [
-            applyActionsToPropertyMetadata(graphqlPropertyActions),
-            decorateClassWith(meta => GqlObjectType({
-                description: meta.description,
-            })),
-        ]
-    ),
+        not(matchesMetadata({ hidden })),
+        [
+            ifMetadata(
+                matchesMetadata({ output }),
+                [
+                    applyActionsToPropertyMetadata(graphqlPropertyActions),
+                    decorateClassWith(meta => GqlObjectType({
+                        description: meta.description,
+                    })),
+                ]
+            ),
 
-    ifMetadata(
-        matchesMetadata({ input }), [
-            applyActionsToPropertyMetadata(graphqlPropertyActions),
-            decorateClassWith(meta => GqlInputType({
-                description: meta.description,
-            })),
+            ifMetadata(
+                matchesMetadata({ input }),
+                [
+                    applyActionsToPropertyMetadata(graphqlPropertyActions),
+                    decorateClassWith(meta => GqlInputType({
+                        description: meta.description,
+                    })),
+                ]
+            )
         ]
     )
 ];

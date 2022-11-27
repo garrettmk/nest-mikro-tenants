@@ -1,4 +1,4 @@
-import { BaseModel, Class, entity, optional, input, output, Property, unique } from "@garrettmk/class-schema";
+import { BaseModel, Class, entity, optional, input, output, Property, unique, hidden } from "@garrettmk/class-schema";
 import { Pick, CreateInput, ObjectFilterInput, UpdateInput, WhereInput, WhereOneInput, Paginated } from "@nest-mikro-tenants/core/factories";
 
 @Class({ output, entity, description: 'An application user' })
@@ -6,7 +6,7 @@ export class User extends BaseModel {
   @Property(() => String, { unique, minLength: 2 })
   username!: string;
 
-  @Property(() => String)
+  @Property(() => String, { hidden })
   password!: string;
 
   @Property(() => String, { unique })
@@ -15,10 +15,10 @@ export class User extends BaseModel {
   @Property(() => String, { optional, minLength: 2 })
   nickname?: string;
 
-  @Property(() => Date)
+  @Property(() => Date, { default: () => new Date() })
   createdAt!: Date;
 
-  @Property(() => Date)
+  @Property(() => Date, { default: () => new Date() })
   updatedAt!: Date;
 }
 
@@ -32,7 +32,10 @@ export class UserCreateInput extends CreateInput(User, {
 @Class({ input })
 export class UserUpdateInput extends UpdateInput(User, {
   omitted: ['createdAt', 'updatedAt'],
-}) {}
+}) {
+  @Property(() => String, { optional })
+  password?: string;
+}
 
 
 @Class({ input })

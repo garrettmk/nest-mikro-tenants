@@ -8,12 +8,19 @@
     "test": "nx test"
   },
   "private": true,
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./mikro-orm.config.ts"
+    ]
+  },
   "dependencies": {
     "@apollo/client": "^3.7.1",
     "@garrettmk/class-schema": "file:../class-schema/dist/packages/class-schema",
     "@garrettmk/metadata-actions": "file:../class-schema/dist/packages/metadata-actions",
     "@garrettmk/metadata-manager": "file:../class-schema/dist/packages/metadata-manager",
     "@garrettmk/ts-utils": "file:../ts-utils",
+    "@mikro-orm/cli": "^5.5.3",
     "@mikro-orm/core": "^5.5.3",
     "@mikro-orm/nestjs": "^5.1.2",
     "@mikro-orm/postgresql": "^5.5.3",
