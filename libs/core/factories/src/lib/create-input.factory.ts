@@ -1,9 +1,7 @@
 import {
   BaseModel,
   BaseObject,
-  BaseObjectConstructor, input, makePropertiesOptional,
-  makePropertiesRequired,
-  omitProperties, PropertiesMetadata, PropertiesMetadataManager
+  BaseObjectConstructor, input, omitProperties, PropertiesMetadata, PropertiesMetadataManager
 } from '@garrettmk/class-schema';
 import { applyActions, applyActionsToProperties, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey, MetadataKeys } from '@garrettmk/metadata-manager';
@@ -36,10 +34,11 @@ export type CreateInputOptions<
   Required extends MetadataKeys<Model> = never,
   Omitted extends MetadataKeys<Model> = never
 > = {
-  required?: Required[];
-  omitted?: Omitted[];
-  name?: string;
-  description?: string;
+  required?: Required[]
+  omitted?: Omitted[]
+  name?: string
+  description?: string
+  abstract?: boolean
 };
 
 
@@ -57,14 +56,15 @@ export function CreateInput<
   modelType: Constructor<Model>,
   options?: CreateInputOptions<Model, Required, Omitted>
 ): BaseObjectConstructor<CreateInput<Model, Required, Omitted>> {
-  const { required, omitted, name, description } = optionsWithDefaults(options, modelType);
+  const { required, omitted, name, description, abstract } = optionsWithDefaults(options, modelType);
   const modelPropertiesMetadata = PropertiesMetadataManager.getMetadata(modelType);
 
   return BaseObject.createClass({
     name,
     classMetadata: {
       input,
-      description
+      description,
+      abstract
     },
     propertiesMetadata: toCreateInputProperties(modelPropertiesMetadata, required, omitted)
   });
@@ -88,6 +88,7 @@ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<M> = ne
     omitted = [],
     name = `${objectType.name}CreateInput`,
     description = `DTO for creating ${objectType.name} models`,
+    abstract = false
   } = options ?? {};
 
   return {
@@ -95,6 +96,7 @@ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<M> = ne
     omitted,
     name,
     description,
+    abstract
   };
 }
 
