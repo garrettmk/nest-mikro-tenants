@@ -8,12 +8,11 @@ import {
   PropertiesMetadataManager,
   PropertyMetadata
 } from '@garrettmk/class-schema';
-import { applyActions, applyActionsToProperties, ifMetadata, PropertyContext } from '@garrettmk/metadata-actions';
+import { applyActions, applyActionsToProperties, ifMetadata, PropertyContext, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
 import { FilterTypesRegistry, isFilterableField } from './registries/filter-types.registry';
 import { omitProperties } from './util/omit-properties';
-import { substituteType } from './util/substitute-type.util';
 
 
 export type ObjectFilterInputOptions = {
@@ -60,7 +59,9 @@ function toObjectFilterMetadata(target: Constructor): PropertiesMetadata {
     applyActionsToProperties(
       ifMetadata(
         isFilterableField,
-        substituteType((meta) => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor)),
+        updateMetadata(meta => ({
+          type: () => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor)
+        })),
         addToOmittedList
       )
     ),

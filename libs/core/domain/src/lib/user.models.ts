@@ -1,5 +1,7 @@
-import { BaseModel, Class, entity, optional, input, output, Property, unique, hidden, abstract } from "@garrettmk/class-schema";
+import { manyToMany, BaseModel, Class, entity, optional, input, output, Property, unique, hidden, abstract } from "@garrettmk/class-schema";
 import { Pick, CreateInput, ObjectFilterInput, UpdateInput, WhereInput, WhereOneInput, Paginated } from "@nest-mikro-tenants/core/factories";
+import { Tenant } from "./tenant.models";
+
 
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
@@ -20,6 +22,11 @@ export class User extends BaseModel {
 
   @Property(() => Date, { default: () => new Date() })
   updatedAt!: Date;
+
+  // Relations
+
+  @Property(() => [Tenant], { manyToMany })
+  tenants?: Tenant[]
 }
 
 

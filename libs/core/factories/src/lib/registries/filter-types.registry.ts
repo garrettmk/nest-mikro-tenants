@@ -1,6 +1,6 @@
 import { BaseObjectConstructor, Float, getTypeInfo, Id, Int, PropertyMetadata } from '@garrettmk/class-schema';
 import { MetadataSelector } from '@garrettmk/metadata-actions';
-import { ClassMetadataDecoratorFn, MetadataManagerClass } from '@garrettmk/metadata-manager';
+import { MetadataManagerClass } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
 import { BooleanFilterInput } from '../objects/boolean-filter-input.object';
 import { DateFilterInput } from '../objects/date-filter-input.object';
@@ -38,10 +38,12 @@ export class FilterTypesRegistry extends MetadataManagerClass<FilterTypeMetadata
   }
 }
 
-export const FilterTypeMeta = ClassMetadataDecoratorFn(FilterTypesRegistry);
 
 export const isFilterableField: MetadataSelector<PropertyMetadata> = (metadata) => {
   const { innerType } = getTypeInfo(metadata.type);
 
-  return FilterTypesRegistry.hasMetadata(innerType as Constructor);
+  if (innerType)
+    return FilterTypesRegistry.hasMetadata(innerType as Constructor);
+
+  return false;
 };
