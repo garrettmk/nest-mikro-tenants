@@ -1,11 +1,12 @@
 import {
   BaseModel,
   BaseObject,
-  BaseObjectConstructor, input, omitProperties, PropertiesMetadata, PropertiesMetadataManager
+  BaseObjectConstructor, Id, innerTypeExtends, input, omitProperties, PropertiesMetadata, PropertiesMetadataManager
 } from '@garrettmk/class-schema';
-import { applyActions, applyActionsToProperties, updateMetadata } from '@garrettmk/metadata-actions';
+import { applyActions, applyActionsToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey, MetadataKeys } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
+import { substituteType } from './util/substitute-type.util';
 import { Require } from './util/types';
 
 
@@ -111,10 +112,18 @@ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<M> = ne
 function toCreateInputProperties(metadata: PropertiesMetadata, required: MetadataKey[], omitted: MetadataKey[]): PropertiesMetadata {
   const properties = applyActions(metadata, {}, [
     omitProperties(...omitted),
-    applyActionsToProperties(updateMetadata((meta, ctx) => ({
-      optional: !required.includes(ctx.propertyKey),
-      hidden: required.includes(ctx.propertyKey) ? false : meta.hidden
-    }))),
+    applyActionsToProperties([
+      updateMetadata((meta, ctx) => ({
+        optional: !required.includes(ctx.propertyKey),
+        hidden: required.includes(ctx.propertyKey) ? false : meta.hidden
+      })),
+
+      ifMetadata(
+        // @ts-expect-error abstract class constructor
+        innerTypeExtends(BaseModel),
+        substituteType(() => Id)
+      )
+    ]),
   ]);
 
   return properties;

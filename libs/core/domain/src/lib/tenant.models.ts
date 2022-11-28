@@ -4,20 +4,20 @@ import { User } from "./user.models";
 
 @Class({ output, entity, description: 'An application tenant'})
 export class Tenant extends BaseModel {
-    @Property(() => String, { unique, minLength: 2 })
+    @Property(() => String, { unique, minLength: 2, description: 'The tenant\'s complete name' })
     name!: string;
 
-    @Property(() => String, { unique, minLength: 2 })
+    @Property(() => String, { unique, minLength: 2, description: 'A simplified, kebab-case version on the tenant\'s name' })
     slug!: string;
 
-    @Property(() => Date, { default: () => new Date() })
+    @Property(() => Date, { default: () => new Date(), description: 'The datetime the model was created' })
     createdAt!: Date;
 
-    @Property(() => Date, { default: () => new Date() })
+    @Property(() => Date, { default: () => new Date(), description: 'The datetime the model was last updated' })
     updatedAt!: Date;
 
     // Relations
-    @Property(() => [User], { manyToMany })
+    @Property(() => [User], { manyToMany, description: 'User\'s belonging to this tenant' })
     users?: User[];
 }
 
