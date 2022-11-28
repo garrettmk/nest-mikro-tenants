@@ -29,10 +29,12 @@ export function Paginated<Obj extends BaseObject>(
     },
     propertiesMetadata: {
       pagination: {
-        type: () => Pagination
+        type: () => Pagination,
+        description: 'Pagination data'
       },
       items: {
-        type: () => [objectType]
+        type: () => [objectType],
+        description: 'An array of items'
       }
     }
   });

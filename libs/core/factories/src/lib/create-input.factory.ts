@@ -1,7 +1,7 @@
 import {
   BaseModel,
   BaseObject,
-  BaseObjectConstructor, Id, innerTypeExtends, input, omitProperties, PropertiesMetadata, PropertiesMetadataManager
+  BaseObjectConstructor, Id, innerType, innerTypeExtends, innerTypeMatches, input, omitProperties, or, PropertiesMetadata, PropertiesMetadataManager
 } from '@garrettmk/class-schema';
 import { applyActions, applyActionsToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey, MetadataKeys } from '@garrettmk/metadata-manager';
@@ -115,14 +115,20 @@ function toCreateInputProperties(metadata: PropertiesMetadata, required: Metadat
     applyActionsToProperties([
       updateMetadata((meta, ctx) => ({
         optional: !required.includes(ctx.propertyKey),
-        hidden: required.includes(ctx.propertyKey) ? false : meta.hidden
+        hidden: required.includes(ctx.propertyKey) ? false : meta.hidden,
       })),
 
       ifMetadata(
-        // @ts-expect-error abstract class constructor
-        innerTypeExtends(BaseModel),
-        substituteType(() => Id)
-      )
+        or(
+          // @ts-expect-error abstract class constructor
+          innerTypeExtends(BaseModel),
+          // @ts-expect-error undefined not a constructor
+          innerTypeMatches(undefined)
+        ),
+        [
+          substituteType(() => Id)
+        ]
+      ),
     ]),
   ]);
 

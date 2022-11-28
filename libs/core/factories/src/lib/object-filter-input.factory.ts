@@ -17,20 +17,22 @@ import { omitProperties } from './util/omit-properties';
 
 export type ObjectFilterInputOptions = {
   name?: string
-  description?: string
+  description?: string,
+  abstract?: boolean
 };
 
 export function ObjectFilterInput<T extends object>(
   objectType: Constructor<T>,
   options?: ObjectFilterInputOptions
 ): BaseObjectConstructor<ObjectConstraints<T>> {
-  const { name, description } = optionsWithDefaults(options, objectType);
+  const { name, description, abstract } = optionsWithDefaults(options, objectType);
 
   const filterType = BaseObject.createClass<ObjectConstraints<T>>({
     name,
     classMetadata: {
       input,
       description,
+      abstract
     },
     propertiesMetadata: toObjectFilterMetadata(objectType),
   });
@@ -45,8 +47,9 @@ function optionsWithDefaults(
   objectType: Constructor
 ): Required<ObjectFilterInputOptions> {
   return {
-    name: options?.name ?? `${objectType.name}FilterInput`,
+    name: options?.name ?? options?.abstract ? `Abstract${objectType.name}FilterInput` : `${objectType.name}FilterInput`,
     description: options?.description ?? `DTO for filtering ${objectType.name} objects`,
+    abstract: options?.abstract ?? false
   };
 }
 
@@ -59,8 +62,9 @@ function toObjectFilterMetadata(target: Constructor): PropertiesMetadata {
     applyActionsToProperties(
       ifMetadata(
         isFilterableField,
-        updateMetadata(meta => ({
-          type: () => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor)
+        updateMetadata((meta, ctx) => ({
+          type: () => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor),
+          description: `Filter objects on the ${String(ctx.propertyKey)} property`
         })),
         addToOmittedList
       )

@@ -3,6 +3,6 @@ import { PaginationInput } from './pagination-input.object';
 
 @Class({ output })
 export class Pagination extends PaginationInput {
-  @Property(() => Int, { min: 0 })
+  @Property(() => Int, { min: 0, description: 'The total number to items available' })
   total!: number;
 }

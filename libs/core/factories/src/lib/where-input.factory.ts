@@ -26,9 +26,21 @@ export function WhereInput<T extends object, F extends ObjectConstraints<T> = Ob
       description
     },
     propertiesMetadata: {
-      _and: { type: () => [filterType], optional },
-      _or: { type: () => [filterType], optional },
-      _not: { type: () => [filterType], optional }
+      _and: {
+        type: () => [filterType],
+        optional,
+        description: 'Matches objects that match all of the given conditions'
+      },
+      _or: {
+        type: () => [filterType],
+        optional,
+        description: 'Matches objects that match any of the given conditions'
+      },
+      _not: {
+        type: () => [filterType],
+        optional,
+        description: 'Matches objects that match none of the given condtions'
+      }
     }
   });
 

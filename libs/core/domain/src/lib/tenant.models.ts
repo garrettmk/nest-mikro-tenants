@@ -35,7 +35,7 @@ export class TenantUpdateInput extends UpdateInput(Tenant, {
 }) {}
 
 @Class({ input })
-export class TenantFilterInput extends ObjectFilterInput(Tenant) {}
+export class TenantFilterInput extends ObjectFilterInput(Tenant, { abstract }) {}
 
 @Class({ input })
 export class TenantFilterOneInput extends Pick(TenantFilterInput, ['id', 'name', 'slug']) {}

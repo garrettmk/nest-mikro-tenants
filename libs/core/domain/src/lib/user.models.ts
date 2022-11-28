@@ -5,27 +5,27 @@ import { Tenant } from "./tenant.models";
 
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
-  @Property(() => String, { unique, minLength: 2 })
+  @Property(() => String, { unique, minLength: 2, description: 'The user\'s unique username' })
   username!: string;
 
-  @Property(() => String, { hidden })
+  @Property(() => String, { hidden, description: 'The user\'s password' })
   password!: string;
 
-  @Property(() => String, { unique })
+  @Property(() => String, { unique, description: 'The user\'s unique email address' })
   email!: string;
 
-  @Property(() => String, { optional, minLength: 2 })
+  @Property(() => String, { optional, minLength: 2, description: 'The user\'s human name' })
   nickname?: string;
 
-  @Property(() => Date, { default: () => new Date() })
+  @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was created' })
   createdAt!: Date;
 
-  @Property(() => Date, { default: () => new Date() })
+  @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was last updated' })
   updatedAt!: Date;
 
   // Relations
 
-  @Property(() => [Tenant], { manyToMany })
+  @Property(() => [Tenant], { manyToMany, description: 'The tenants this user belongs to' })
   tenants?: Tenant[]
 }
 
