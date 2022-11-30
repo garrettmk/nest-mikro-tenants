@@ -1,5 +1,5 @@
 import { abstract, BaseModel, Class, entity, input, output, Property, unique, manyToMany } from "@garrettmk/class-schema";
-import { CreateInput, ObjectFilterInput, Paginated, Pick, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
+import { CreateInput, FiltersType, ObjectFilter, Paginated, Pick, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
 import { User } from "./user.models";
 
 @Class({ output, entity, description: 'An application tenant'})
@@ -34,8 +34,9 @@ export class TenantUpdateInput extends UpdateInput(Tenant, {
     abstract
 }) {}
 
+@FiltersType(Tenant)
 @Class({ input })
-export class TenantFilterInput extends ObjectFilterInput(Tenant, { abstract }) {}
+export class TenantFilterInput extends ObjectFilter(Tenant) {}
 
 @Class({ input })
 export class TenantFilterOneInput extends Pick(TenantFilterInput, ['id', 'name', 'slug']) {}

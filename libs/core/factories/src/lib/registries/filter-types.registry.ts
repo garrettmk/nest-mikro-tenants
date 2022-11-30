@@ -1,5 +1,4 @@
-import { BaseObjectConstructor, Float, getTypeInfo, Id, Int, PropertyMetadata } from '@garrettmk/class-schema';
-import { MetadataSelector } from '@garrettmk/metadata-actions';
+import { BaseObjectConstructor, CommonPropertyMetadata, Float, getTypeInfo, Id, Int, TypeFn } from '@garrettmk/class-schema';
 import { MetadataManagerClass } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
 import { BooleanFilterInput } from '../objects/boolean-filter-input.object';
@@ -33,17 +32,25 @@ export class FilterTypesRegistry extends MetadataManagerClass<FilterTypeMetadata
     return filterType;
   }
 
+  static getFilterTypeFn(targetFn: TypeFn): TypeFn<Constructor> {
+    return () => {
+      const { innerType } = getTypeInfo(targetFn);
+      return this.getFilterType(innerType as Constructor);
+    }
+  }
+
   static setFilterType(target: Constructor, filterType: BaseObjectConstructor) {
     this.setMetadata(target, { filterType });
   }
+
+  static isFilterableField(metadata: CommonPropertyMetadata): boolean {
+    const { innerType } = getTypeInfo(metadata.type);
+    return Boolean(innerType && FilterTypesRegistry.hasMetadata(innerType as Constructor));
+  }
 }
 
-
-export const isFilterableField: MetadataSelector<PropertyMetadata> = (metadata) => {
-  const { innerType } = getTypeInfo(metadata.type);
-
-  if (innerType)
-    return FilterTypesRegistry.hasMetadata(innerType as Constructor);
-
-  return false;
-};
+export function FiltersType(target: Constructor): ClassDecorator {
+  return function (filterType) {
+    FilterTypesRegistry.setFilterType(target, filterType as unknown as BaseObjectConstructor);
+  }
+}

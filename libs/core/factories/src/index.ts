@@ -1,3 +1,5 @@
+export * from './lib/registries/filter-types.registry';
+export * from './lib/registries/deferred-actions.registry';
 export * from './lib/create-input.factory';
 export * from './lib/update-input.factory';
 export * from './lib/where-input.factory';

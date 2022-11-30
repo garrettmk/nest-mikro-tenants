@@ -1,78 +1,93 @@
 import {
   BaseObject,
-  BaseObjectConstructor,
-  ClassContext, innerType,
-  input,
-  ObjectConstraints,
+  BaseObjectConstructor, ClassMetadata, ObjectConstraints,
   PropertiesMetadata,
   PropertiesMetadataManager,
-  PropertyMetadata
+  PropertyMetadata,
+  withMetadata
 } from '@garrettmk/class-schema';
-import { applyActions, applyActionsToProperties, ifMetadata, PropertyContext, updateMetadata } from '@garrettmk/metadata-actions';
+import { applyActionsToProperties, ifMetadata, PropertyContext, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
-import { FilterTypesRegistry, isFilterableField } from './registries/filter-types.registry';
+import { DeferredActionsRegistry } from './registries/deferred-actions.registry';
+import { FilterTypesRegistry } from './registries/filter-types.registry';
 import { omitProperties } from './util/omit-properties';
 
-
-export type ObjectFilterInputOptions = {
+/**
+ * Options for `ObjectFilterInput`
+ */
+export type ObjectFilterOptions = ClassMetadata & {
   name?: string
-  description?: string,
-  abstract?: boolean
+  register?: boolean
 };
 
-export function ObjectFilterInput<T extends object>(
+/**
+ * @param objectType The constructor of the object to build a filter for
+ * @param options Options for the generated class
+ * @returns A new class implementing the `Constraints` for the object type
+ */
+export function ObjectFilter<T extends object>(
   objectType: Constructor<T>,
-  options?: ObjectFilterInputOptions
+  options?: ObjectFilterOptions
 ): BaseObjectConstructor<ObjectConstraints<T>> {
-  const { name, description, abstract } = optionsWithDefaults(options, objectType);
+  const { name, register, ...classMetadata } = optionsWithDefaults(options, objectType);
+  const objectPropertiesMetadata = PropertiesMetadataManager.getMetadata(objectType);
+  const { addToOmittedList, removeOmittedFields } = omitFieldsActions();
 
   const filterType = BaseObject.createClass<ObjectConstraints<T>>({
     name,
-    classMetadata: {
-      input,
-      description,
-      abstract
-    },
-    propertiesMetadata: toObjectFilterMetadata(objectType),
+    classMetadata,
+    propertiesMetadata: {},
   });
 
-  FilterTypesRegistry.setFilterType(objectType, filterType);
+  DeferredActionsRegistry.setMetadata(filterType, {
+    propertiesActions: withMetadata(objectPropertiesMetadata, [
+      applyActionsToProperties([
+        ifMetadata(
+          FilterTypesRegistry.isFilterableField,
+          updateMetadata((meta, ctx) => ({
+            type: FilterTypesRegistry.getFilterTypeFn(meta.type),
+            optional: true,
+            description: `Filter on the ${String(ctx.propertyKey)} property`
+          })),
+          addToOmittedList
+        ),
+      ]),
+      removeOmittedFields
+    ])
+  });
+
+  if (register)
+    FilterTypesRegistry.setFilterType(objectType, filterType);
 
   return filterType;
 }
 
+
+/**
+ * @internal
+ * @param options An optional options object
+ * @param objectType The target class constructor
+ * @returns `options` with defaults filled in
+ */
 function optionsWithDefaults(
-  options: ObjectFilterInputOptions | undefined,
+  options: ObjectFilterOptions | undefined,
   objectType: Constructor
-): Required<ObjectFilterInputOptions> {
+): { name: string } & ObjectFilterOptions {
   return {
-    name: options?.name ?? options?.abstract ? `Abstract${objectType.name}FilterInput` : `${objectType.name}FilterInput`,
+    name: options?.name ?? options?.abstract
+      ? `Abstract${objectType.name}FilterInput`
+      : `${objectType.name}FilterInput`,
+
     description: options?.description ?? `DTO for filtering ${objectType.name} objects`,
-    abstract: options?.abstract ?? false
   };
 }
 
-function toObjectFilterMetadata(target: Constructor): PropertiesMetadata {
-  const targetPropertiesMeta = PropertiesMetadataManager.getMetadata(target);
-  const targetContext: ClassContext = { target };
-  const { addToOmittedList, removeOmittedFields } = omitFieldsActions();
-
-  return applyActions(targetPropertiesMeta, targetContext, [
-    applyActionsToProperties(
-      ifMetadata(
-        isFilterableField,
-        updateMetadata((meta, ctx) => ({
-          type: () => FilterTypesRegistry.getFilterType(innerType(meta.type) as unknown as Constructor),
-          description: `Filter objects on the ${String(ctx.propertyKey)} property`
-        })),
-        addToOmittedList
-      )
-    ),
-    removeOmittedFields,
-  ]);
-}
-
+/**
+ * @internal
+ * @returns Actions for adding fields to a list, and removing those
+ *          fields from metadata
+ */
 function omitFieldsActions() {
   const omitted: MetadataKey[] = [];
 

@@ -1,11 +1,12 @@
 import {
   BaseModel,
   BaseObject,
-  BaseObjectConstructor, Id, innerType, innerTypeExtends, innerTypeMatches, input, omitProperties, or, PropertiesMetadata, PropertiesMetadataManager
+  BaseObjectConstructor, Id, innerTypeExtends, input, omitProperties, PropertiesMetadataManager, withMetadata
 } from '@garrettmk/class-schema';
-import { applyActions, applyActionsToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
-import { MetadataKey, MetadataKeys } from '@garrettmk/metadata-manager';
+import { applyActionsToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
+import { MetadataKeys } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
+import { DeferredActionsRegistry } from './registries/deferred-actions.registry';
 import { substituteType } from './util/substitute-type.util';
 import { Require } from './util/types';
 
@@ -60,15 +61,40 @@ export function CreateInput<
   const { required, omitted, name, description, abstract } = optionsWithDefaults(options, modelType);
   const modelPropertiesMetadata = PropertiesMetadataManager.getMetadata(modelType);
 
-  return BaseObject.createClass({
+  const generatedClass = BaseObject.createClass<CreateInput<Model, Required, Omitted>>({
     name,
     classMetadata: {
       input,
       description,
       abstract
     },
-    propertiesMetadata: toCreateInputProperties(modelPropertiesMetadata, required, omitted)
+    propertiesMetadata: {
+      error: {
+        type: () => String,
+        default: () => `The deferred actions for ${name} have not been run yet`
+      }
+    },
   });
+
+  DeferredActionsRegistry.setMetadata(generatedClass, {
+    propertiesActions: withMetadata(modelPropertiesMetadata, [
+      omitProperties(...omitted),
+
+      applyActionsToProperties([
+        updateMetadata((meta, ctx) =>  ({
+          optional: !required.includes(ctx.propertyKey as Required),
+          hidden: required.includes(ctx.propertyKey as Required) ? false : meta.hidden,
+        })),
+
+        ifMetadata(
+          innerTypeExtends(BaseModel),
+          substituteType(() => Id)
+        )
+      ])
+    ])
+  });
+
+  return generatedClass;
 }
 
 /**
@@ -99,38 +125,4 @@ function optionsWithDefaults<M extends BaseModel, R extends MetadataKeys<M> = ne
     description,
     abstract
   };
-}
-
-/**
- * @internal
- *
- * @param metadata
- * @param required
- * @param omitted
- * @returns
- */
-function toCreateInputProperties(metadata: PropertiesMetadata, required: MetadataKey[], omitted: MetadataKey[]): PropertiesMetadata {
-  const properties = applyActions(metadata, {}, [
-    omitProperties(...omitted),
-    applyActionsToProperties([
-      updateMetadata((meta, ctx) => ({
-        optional: !required.includes(ctx.propertyKey),
-        hidden: required.includes(ctx.propertyKey) ? false : meta.hidden,
-      })),
-
-      ifMetadata(
-        or(
-          // @ts-expect-error abstract class constructor
-          innerTypeExtends(BaseModel),
-          // @ts-expect-error undefined not a constructor
-          innerTypeMatches(undefined)
-        ),
-        [
-          substituteType(() => Id)
-        ]
-      ),
-    ]),
-  ]);
-
-  return properties;
 }

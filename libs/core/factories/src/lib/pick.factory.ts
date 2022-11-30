@@ -1,15 +1,28 @@
-import { BaseObject, BaseObjectConstructor, PropertiesMetadataManager } from "@garrettmk/class-schema";
+import { BaseObject, BaseObjectConstructor, ClassMetadata, pickProperties, PropertiesMetadataManager, withMetadata } from "@garrettmk/class-schema";
 import { MetadataKey } from "@garrettmk/metadata-manager";
 import { Constructor } from "@garrettmk/ts-utils";
-import { pick } from 'radash';
+import { DeferredActionsRegistry } from "./registries/deferred-actions.registry";
 
 
+export type PickOptions = ClassMetadata & {
+    name?: string
+}
 
-export function Pick<T extends object, K extends keyof T>(objectType: Constructor<T>, keys: K[]): BaseObjectConstructor<Pick<T, K>> {
-    const objectPropertiesMeta = PropertiesMetadataManager.getMetadata(objectType);
-    const pickedPropertiesMeta = pick(objectPropertiesMeta, keys as MetadataKey[]);
 
-    return BaseObject.createClass({
-        propertiesMetadata: pickedPropertiesMeta
+export function Pick<T extends object, K extends keyof T>(objectType: Constructor<T>, keys: K[], options?: PickOptions): BaseObjectConstructor<Pick<T, K>> {
+    const { name, ...classMetadata } = options ?? {};
+
+    const generatedClass = BaseObject.createClass<Pick<T, K>>({
+        name,
+        classMetadata,
+        propertiesMetadata: {}
     });
+
+    DeferredActionsRegistry.setMetadata(generatedClass, {
+        propertiesActions: withMetadata(() => PropertiesMetadataManager.getMetadata(objectType), [
+            pickProperties(...(keys as MetadataKey[]))
+        ])
+    });
+
+    return generatedClass;
 }
