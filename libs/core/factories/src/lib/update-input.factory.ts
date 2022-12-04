@@ -3,12 +3,11 @@ import {
   BaseObject,
   BaseObjectConstructor, Id, innerTypeExtends, input, omitProperties, PropertiesMetadataManager, withMetadata
 } from '@garrettmk/class-schema';
-import { applyActionsToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
+import { applyToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKeys } from '@garrettmk/metadata-manager';
-import { Constructor } from '@garrettmk/ts-utils';
+import { Constructor, Require } from '@garrettmk/ts-utils';
 import { DeferredActionsRegistry } from './registries/deferred-actions.registry';
 import { substituteType } from './util/substitute-type.util';
-import { Require } from './util/types';
 
 export type UpdatableFields<Model extends BaseModel> = Omit<Model, 'id'>;
 
@@ -79,7 +78,7 @@ export function UpdateInput<
   DeferredActionsRegistry.setMetadata(generatedClass, {
     propertiesActions: withMetadata(modelPropertiesMetadata, [
       omitProperties(...omitted),
-      applyActionsToProperties([
+      applyToProperties([
         updateMetadata((meta, ctx) => ({
           optional: !required.includes(ctx.propertyKey as Required),
           hidden: required.includes(ctx.propertyKey as Required) ? false : meta.hidden,

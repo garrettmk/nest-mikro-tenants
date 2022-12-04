@@ -6,7 +6,7 @@ import {
   PropertyMetadata,
   withMetadata
 } from '@garrettmk/class-schema';
-import { applyActionsToProperties, ifMetadata, PropertyContext, updateMetadata } from '@garrettmk/metadata-actions';
+import { applyToProperties, ifMetadata, PropertyContext, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKey } from '@garrettmk/metadata-manager';
 import { Constructor } from '@garrettmk/ts-utils';
 import { DeferredActionsRegistry } from './registries/deferred-actions.registry';
@@ -42,7 +42,7 @@ export function ObjectFilter<T extends object>(
 
   DeferredActionsRegistry.setMetadata(filterType, {
     propertiesActions: withMetadata(objectPropertiesMetadata, [
-      applyActionsToProperties([
+      applyToProperties([
         ifMetadata(
           FilterTypesRegistry.isFilterableField,
           updateMetadata((meta, ctx) => ({

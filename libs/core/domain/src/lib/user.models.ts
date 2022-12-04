@@ -25,8 +25,8 @@ export class User extends BaseModel {
 
   // Relations
 
-  @Property(() => [Tenant], { manyToMany, description: 'The tenants this user belongs to' })
-  tenants?: Tenant[]
+  // @Property(() => [Tenant], { manyToMany, description: 'The tenants this user belongs to' })
+  // tenants?: Tenant[]
 }
 
 
