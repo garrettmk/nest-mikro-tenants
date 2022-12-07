@@ -6,7 +6,7 @@ import {
 import { applyToProperties, ifMetadata, updateMetadata } from '@garrettmk/metadata-actions';
 import { MetadataKeys } from '@garrettmk/metadata-manager';
 import { Constructor, Require } from '@garrettmk/ts-utils';
-import { DeferredActionsRegistry } from './registries/deferred-actions.registry';
+import { FactoryActions } from './registries/deferred-actions.registry';
 import { substituteType } from './util/substitute-type.util';
 
 
@@ -75,7 +75,7 @@ export function CreateInput<
     },
   });
 
-  DeferredActionsRegistry.setMetadata(generatedClass, {
+  FactoryActions.setMetadata(generatedClass, {
     propertiesActions: withMetadata(modelPropertiesMetadata, [
       omitProperties(...omitted),
 

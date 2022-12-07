@@ -86,7 +86,7 @@ export function CrudService<
         public async createOne(input: C): Promise<T> {
             const createInput = await GeneratedCrudService.toCreateInput(input);
             const entity = this.repo.create(createInput);
-
+            
             await this.repo.persistAndFlush(entity);
             return entity;
         }

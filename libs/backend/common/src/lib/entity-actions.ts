@@ -1,14 +1,16 @@
-import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, entity, getTypeInfo, Id, isBuiltInField, isPrimaryKeyField, PropertyMetadata, withPropertiesMetadata } from "@garrettmk/class-schema";
-import { always, applyToProperties, ifMetadata, matchesMetadata, MetadataAction, option, transformContext } from "@garrettmk/metadata-actions";
-import { doesExtend, MaybeArray } from "@garrettmk/ts-utils";
+import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, ClassMetadataManager, entity, getTypeInfo, Id, isBuiltInField, isPrimaryKeyField, PropertyMetadata, withPropertiesMetadata } from "@garrettmk/class-schema";
+import { always, applyToProperties, ifMetadata, matchesMetadata, MetadataActionSet, option, transformContext } from "@garrettmk/metadata-actions";
+import { Constructor, doesExtend, MaybeArray } from "@garrettmk/ts-utils";
 import { EntitySchema } from "@mikro-orm/core";
+import cuid from "cuid";
 import { EntitySchemaRegistry } from "./entity-registry";
+
 
 export type EntityBuilderContext = ClassContext & {
     entity: any
 }
 
-export const entityClassActions: MetadataAction<ClassMetadata, ClassContext>[] = [
+export const EntityActions = new MetadataActionSet<ClassMetadata, Constructor>(ClassMetadataManager, [
     ifMetadata(
         matchesMetadata({ entity }),
         transformContext(
@@ -21,7 +23,7 @@ export const entityClassActions: MetadataAction<ClassMetadata, ClassContext>[] =
                                     type: Id.prototype instanceof String ? 'string' : 'number',
                                     primary: true,
                                     comment: meta.description,
-                                    onCreate: meta.default,
+                                    onCreate: cuid,
                                 }
                             });
                         }),
@@ -45,6 +47,7 @@ export const entityClassActions: MetadataAction<ClassMetadata, ClassContext>[] =
                         }),
 
                         option(isEntityField, (meta, ctx) => {
+                            // @ts-expect-error idk
                             const { innerType, isArray } = getTypeInfo(meta.type);
 
                             Object.assign(ctx.entity.properties, {
@@ -65,7 +68,7 @@ export const entityClassActions: MetadataAction<ClassMetadata, ClassContext>[] =
                         }),
 
                         option(always, (meta, ctx) => {
-                            console.log(`Can't make field: ${ctx.target.name}.${ctx.propertyKey}`);
+                            console.log(`Can't make field for ${ctx.target.name} entity: ${String(ctx.propertyKey)}`);
                         })
                     ])
                 ]),
@@ -85,7 +88,7 @@ export const entityClassActions: MetadataAction<ClassMetadata, ClassContext>[] =
             ]
         )
     )
-];
+]);
 
 
 function toEntityBuilderContext(metadata: ClassMetadata, context: ClassContext): EntityBuilderContext {

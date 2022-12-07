@@ -8,12 +8,12 @@ export type DeferredActionsMetadata = {
     propertiesActions?: MaybeArray<PropertiesMetadataAction>
 }
 
-export class DeferredActionsRegistry extends MetadataManagerClass<DeferredActionsMetadata, Constructor>() {
+export class FactoryActions extends MetadataManagerClass<DeferredActionsMetadata, Constructor>() {
     static getMetadata(target: Constructor): DeferredActionsMetadata {
         return this.metadatas.get(target) ?? {};
     }
 
-    static runDeferredActions() {
+    static applyActions() {
         this.entries().forEach(([target, metadata]) => {
             const { classActions, propertiesActions } = metadata;
             const classMetadata = ClassMetadataManager.getMetadata(target);
@@ -29,6 +29,8 @@ export class DeferredActionsRegistry extends MetadataManagerClass<DeferredAction
                 const updatedPropertiesMeta = applyActions(propertiesMetadata, context, propertiesActions);
                 PropertiesMetadataManager.setMetadata(target, updatedPropertiesMeta);
             }
+
+            this.metadatas.delete(target);
         });
     }
 }
