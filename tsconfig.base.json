@@ -1,27 +1,27 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "rootDir": ".",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2017", "dom"],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@nest-mikro-tenants/backend/common": ["libs/backend/common/src/index.ts"],
-      "@nest-mikro-tenants/backend/factories": ["libs/backend/factories/src/index.ts"],
-      "@nest-mikro-tenants/core/common": ["libs/core/common/src/index.ts"],
-      "@nest-mikro-tenants/core/domain": ["libs/core/domain/src/index.ts"],
-      "@nest-mikro-tenants/core/factories": ["libs/core/factories/src/index.ts"]
-    }
-  },
-  "exclude": ["node_modules", "tmp"]
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "es2015",
+        "module": "esnext",
+        "lib": ["es2017", "dom"],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "@nest-mikro-tenants/backend/common": ["libs/backend/common/src/index.ts"],
+            "@nest-mikro-tenants/backend/factories": ["libs/backend/factories/src/index.ts"],
+            "@nest-mikro-tenants/core/common": ["libs/core/common/src/index.ts"],
+            "@nest-mikro-tenants/core/domain": ["libs/core/domain/src/index.ts"],
+            "@nest-mikro-tenants/core/factories": ["libs/core/factories/src/index.ts"]
+        }
+    },
+    "exclude": ["node_modules", "tmp"]
 }
