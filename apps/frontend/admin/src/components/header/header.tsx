@@ -7,7 +7,7 @@ export default component$(() => {
 
     return (
         <header>
-            <div class="logo">
+            <div class="bg-slate-600" style="border: 2px solid blue;">
                 <a href="https://qwik.builder.io/" target="_blank">
                     <QwikLogo />
                 </a>
