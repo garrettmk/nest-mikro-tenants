@@ -1,6 +1,8 @@
-import { component$ } from "@builder.io/qwik";
+import { $, component$ } from "@builder.io/qwik";
 import { DocumentHead } from "@builder.io/qwik-city";
 import PageHeader from "../../components/header/page-header";
+import ClassMetadataView from "../../components/objects/class-metadata";
+import { UserCreateInput } from "@nest-mikro-tenants/core/domain";
 
 export default component$(() => {
     return (
@@ -9,7 +11,7 @@ export default component$(() => {
                 Users
             </PageHeader>
             <section>
-                User stuff
+                <ClassMetadataView type={$(() => UserCreateInput)}/>
             </section>
         </>
     );
