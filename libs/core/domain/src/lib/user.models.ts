@@ -4,10 +4,12 @@ import {
   BaseObject,
   BaseObjectConstructor,
   Class,
+  Constraints,
   entity,
   hidden,
   input,
   manyToMany,
+  ObjectConstraints,
   optional,
   output,
   Property,
@@ -27,20 +29,22 @@ import {
 import { Tenant } from './tenant.models';
 import { faker } from '@faker-js/faker';
 import { shake, mapValues } from 'radash';
+import { IsEmail } from 'class-validator';
 
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
+  @Property(() => String, { optional, minLength: 2, description: "The user's human name" })
+  nickname?: string;
+
   @Property(() => String, { unique, minLength: 2, description: "The user's unique username" })
   username!: string;
-  
-  @Property(() => String, { hidden, description: "The user's password" })
-  password!: string;
-  
+
+  @IsEmail()
   @Property(() => String, { unique, description: "The user's unique email address" })
   email!: string;
   
-  @Property(() => String, { optional, minLength: 2, description: "The user's human name" })
-  nickname?: string;
+  @Property(() => String, { hidden, description: "The user's password" })
+  password!: string;
   
   @Property(() => Date, {
     default: () => new Date(),
@@ -98,7 +102,7 @@ export class UserUpdateInput extends UpdateInput(User, {
 export class UserFilterInput extends ObjectFilter(User) {}
 
 @Class({ input })
-export class UserFilterOneInput extends Pick(UserFilterInput, ['id', 'username', 'email']) {}
+export class UserFilterOneInput extends ObjectFilter(User, { keys: ['id', 'email', 'username'] }) {}
 
 @Class({ input })
 export class UsersWhereInput extends WhereInput(User, UserFilterInput) {}

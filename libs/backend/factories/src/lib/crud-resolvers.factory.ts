@@ -1,8 +1,7 @@
 import { BaseModel } from "@garrettmk/class-schema";
 import { Constructor } from "@garrettmk/ts-utils";
-import { setClassName } from "@nest-mikro-tenants/core/common";
 import { CreateInput, Paginated, PaginationInput, UpdateInput, WhereInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
-import { Args, ID as GqlId, Info, Int as GqlInt, Mutation, Query, ObjectType as GqlObjectType } from '@nestjs/graphql';
+import { Args, ID as GqlId, Info, Int as GqlInt, Mutation, Query } from '@nestjs/graphql';
 import { instanceToPlain } from "class-transformer";
 import { GraphQLResolveInfo } from 'graphql';
 import { CrudService } from "./crud-service.factory";

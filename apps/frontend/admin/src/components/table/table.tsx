@@ -5,8 +5,9 @@ import { get } from 'radash';
 
 export interface TableColumn {
     label: string
-    dataKey: string
+    dataKey?: string
     format?: QRL<(value: unknown) => JSXChildren>
+    classes?: string
 }
 
 export interface TableProps {
@@ -20,17 +21,17 @@ export const Table = component$((props: TableProps) => {
 
     const render = async (item: unknown, column: TableColumn) => {
         const { format = identity, dataKey } = column;
-        const value = get(item, dataKey);
+        const value = dataKey ? get(item, dataKey) : item;
 
         return await format(value) as JSXChildren;
     }
 
     return (
         <table class={clsx("table-auto [&_td]:p-4 text-sm", classNames)}>
-            <thead class="uppercase text-xs">
+            <thead class="uppercase text-xs text-gray-600">
                 <tr>
                     {columns.map(column => (
-                        <td>{column.label}</td>
+                        <td class={column.classes}>{column.label}</td>
                     ))}
                 </tr>
             </thead>
@@ -39,7 +40,7 @@ export const Table = component$((props: TableProps) => {
                 {items.map(item => (
                     <tr class="even:bg-slate-50">
                         {columns.map(column => (
-                            <td class="border-l first:border-l-0">
+                            <td class={clsx("border-l first:border-l-0", column.classes)}>
                                 {render(item, column)}
                             </td>
                         ))}

@@ -7,6 +7,7 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityRepository } from "@mikro-orm/postgresql";
 import { instanceToPlain } from "class-transformer";
 import { setClassName } from "@nest-mikro-tenants/core/common";
+import { mapKeys, mapValues } from "radash";
 
 
 export type FindOptions<T> = {
@@ -52,15 +53,38 @@ export function CrudService<
 ): Constructor<CrudService<T, C, U, W, W1>> {
     const name = `${entity.name}CrudService`;
 
+    const keyMappings = {
+        eq: '$eq',
+        ne: '$ne',
+        in: '$in',
+        nin: '$nin',
+        gt: '$gt',
+        gte: '$gte',
+        lt: '$lt',
+        lte: '$lte',
+    };
+
+    function mapFilterKeys(obj: Record<string, any>) {
+        return mapValues(obj, filter =>
+            mapKeys(filter, key =>
+                key in keyMappings 
+                    ? keyMappings[key as keyof typeof keyMappings]
+                    : key
+            )
+        );
+    }
+
     class GeneratedCrudService implements CrudService<T, C, U, W, W1> {
         protected static async toFilterQuery(data: W): Promise<FilterQuery<T>> {
             const valid = await whereInput.from(data);
-            return instanceToPlain(valid, { exposeUnsetFields: false }) as FilterQuery<T>;
+            const plainWhere = instanceToPlain(valid, { exposeUnsetFields: false });
+            return mapFilterKeys(plainWhere) as FilterQuery<T>;
         }
 
         protected static async toFilterOneQuery(data: W1): Promise<FilterQuery<T>> {
             const valid = await whereOneInput.from(data);
-            return instanceToPlain(valid, { exposeUnsetFields: false }) as FilterQuery<T>;
+            const plainWhere = instanceToPlain(valid, { exposeUnsetFields: false });
+            return mapFilterKeys(plainWhere) as FilterQuery<T>;
         }
 
         protected static async toCreateInput(data: C): Promise<RequiredEntityData<T>> {

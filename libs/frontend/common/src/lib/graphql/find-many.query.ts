@@ -2,7 +2,7 @@ import { BaseModel } from "@garrettmk/class-schema";
 import { Constructor } from "@garrettmk/ts-utils";
 import { WhereInput } from "@nest-mikro-tenants/core/factories";
 import { DocumentNode } from "graphql";
-import gql from "graphql-tag";
+import { gql } from "@urql/core";
 import { propertiesFragment } from "./properties.fragment";
 
 

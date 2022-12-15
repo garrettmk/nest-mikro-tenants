@@ -16,9 +16,10 @@ import { omitProperties } from './util/omit-properties';
 /**
  * Options for `ObjectFilterInput`
  */
-export type ObjectFilterOptions = ClassMetadata & {
+export type ObjectFilterOptions<T extends object, K extends keyof T = keyof T> = ClassMetadata & {
   name?: string
   register?: boolean
+  keys?: K[]
 };
 
 /**
@@ -26,15 +27,15 @@ export type ObjectFilterOptions = ClassMetadata & {
  * @param options Options for the generated class
  * @returns A new class implementing the `Constraints` for the object type
  */
-export function ObjectFilter<T extends object>(
+export function ObjectFilter<T extends object, K extends keyof T = keyof T>(
   objectType: Constructor<T>,
-  options?: ObjectFilterOptions
-): BaseObjectConstructor<ObjectConstraints<T>> {
+  options?: ObjectFilterOptions<T, K>
+): BaseObjectConstructor<Pick<ObjectConstraints<T>, K>> {
   const { name, register, ...classMetadata } = optionsWithDefaults(options, objectType);
   const objectPropertiesMetadata = PropertiesMetadataManager.getMetadata(objectType);
   const { addToOmittedList, removeOmittedFields } = omitFieldsActions();
 
-  const filterType = BaseObject.createClass<ObjectConstraints<T>>({
+  const filterType = BaseObject.createClass<Pick<ObjectConstraints<T>, K>>({
     name,
     classMetadata,
     propertiesMetadata: {},
@@ -71,9 +72,9 @@ export function ObjectFilter<T extends object>(
  * @returns `options` with defaults filled in
  */
 function optionsWithDefaults(
-  options: ObjectFilterOptions | undefined,
+  options: ObjectFilterOptions<any> | undefined,
   objectType: Constructor
-): { name: string } & ObjectFilterOptions {
+): { name: string } & ObjectFilterOptions<any> {
   return {
     name: options?.name ?? options?.abstract
       ? `Abstract${objectType.name}FilterInput`

@@ -27,7 +27,7 @@ export type WhereOneInputOptions = {
 export function WhereOneInput<
   T extends object,
   K extends keyof T = keyof T,
-  F extends ObjectConstraints<T> = ObjectConstraints<T>
+  F extends ObjectConstraints<T, K> = ObjectConstraints<T, K>
 >(
   objectType: Constructor<T>,
   filterType: BaseObjectConstructor<F>,

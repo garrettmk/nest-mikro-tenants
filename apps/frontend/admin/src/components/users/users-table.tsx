@@ -1,8 +1,10 @@
 import { $, component$, Resource } from "@builder.io/qwik";
+import { DataFields } from "@nest-mikro-tenants/core/common";
 import { User, UsersWhereInput } from "@nest-mikro-tenants/core/domain";
 import { findManyQuery } from "@nest-mikro-tenants/frontend/common";
 import { useQuery } from "qwik-urql";
 import { Table, TableColumn } from "../table/table";
+import { UserActionsMenu } from "./user-actions-menu";
 
 export function toLocaleDateString(value: unknown): string {
     return value 
@@ -45,6 +47,11 @@ export const UsersTable = component$(() => {
             label: 'Date Updated',
             dataKey: 'updatedAt',
             format: $(toLocaleDateString)
+        },
+        {
+            label: 'Actions',
+            classes: 'flex justify-center',
+            format: $((user) => <UserActionsMenu user={user as DataFields<User>}/>)
         }
     ]
 
@@ -66,4 +73,4 @@ export const UsersTable = component$(() => {
             />
         </div>
     );
-})
+});
