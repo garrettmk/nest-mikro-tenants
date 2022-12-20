@@ -13,11 +13,17 @@ export interface TableColumn {
 export interface TableProps {
     class?: string
     columns: TableColumn[]
-    items?: any[]
+    items?: unknown[]
+    identityKey?: string
 }
 
 export const Table = component$((props: TableProps) => {
-    const { class: classNames, columns, items = [] } = props;
+    const {
+        class: classNames,
+        columns,
+        items = [],
+        identityKey = 'id'
+    } = props;
 
     const render = async (item: unknown, column: TableColumn) => {
         const { format = identity, dataKey } = column;
@@ -38,9 +44,9 @@ export const Table = component$((props: TableProps) => {
 
             <tbody class="bg-white font-light">
                 {items.map(item => (
-                    <tr class="even:bg-slate-50">
+                    <tr key={get(item, identityKey) as string} class="even:bg-slate-50">
                         {columns.map(column => (
-                            <td class={clsx("border-l first:border-l-0", column.classes)}>
+                            <td key={column.dataKey ?? column.label} class={clsx("border-l first:border-l-0", column.classes)}>
                                 {render(item, column)}
                             </td>
                         ))}

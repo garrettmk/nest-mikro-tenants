@@ -1,4 +1,4 @@
-import { JSXChildren, PropFunction, QwikMouseEvent } from "@builder.io/qwik";
+import { JSXChildren, QRL, PropFunction, QwikMouseEvent } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
 import clsx from "clsx";
 
@@ -6,7 +6,7 @@ export type ButtonProps = {
     id?: string
     class?: string
     href?: string
-    onClick$?: PropFunction<(event: QwikMouseEvent<HTMLElement, MouseEvent>) => void>
+    onClick$?: QRL<(event: QwikMouseEvent<HTMLElement, MouseEvent>) => void>
     disabled?: boolean
     children?: JSXChildren
     tooltip?: string

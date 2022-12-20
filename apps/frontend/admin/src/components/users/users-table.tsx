@@ -1,9 +1,7 @@
-import { $, component$, Resource } from "@builder.io/qwik";
+import { $, component$ } from "@builder.io/qwik";
 import { DataFields } from "@nest-mikro-tenants/core/common";
-import { User, UsersWhereInput } from "@nest-mikro-tenants/core/domain";
-import { findManyQuery } from "@nest-mikro-tenants/frontend/common";
-import { useQuery } from "qwik-urql";
-import { Table, TableColumn } from "../table/table";
+import { User } from "@nest-mikro-tenants/core/domain";
+import { Table, TableColumn, TableProps } from "../table/table";
 import { UserActionsMenu } from "./user-actions-menu";
 
 export function toLocaleDateString(value: unknown): string {
@@ -12,14 +10,11 @@ export function toLocaleDateString(value: unknown): string {
         : '--';
 }
 
-export interface UsersTableProps {
-    users?: User[]
+export interface UsersTableProps extends Omit<TableProps, 'items' | 'columns'> {
+    items?: User[]
 }
 
-
-export const Query = $(() => findManyQuery(User, UsersWhereInput));
-
-export const UsersTable = component$(() => {
+export const UsersTable = component$((props: UsersTableProps) => {
     const columns: TableColumn[] = [
         {
             label: 'ID',
@@ -53,24 +48,9 @@ export const UsersTable = component$(() => {
             classes: 'flex justify-center',
             format: $((user) => <UserActionsMenu user={user as DataFields<User>}/>)
         }
-    ]
-
-    const query = useQuery(Query, undefined);
+    ];
 
     return (
-        <div>
-            <Resource
-                value={query}
-                onPending={() => <span>Pending...</span>}
-                onRejected={(error) => <span>{'' + error}</span>}
-                onResolved={(result) => (
-                    <Table
-                        class="bg-slate-200 rounded-lg overflow-hidden w-full"
-                        columns={columns}
-                        items={result.data?.findManyUsers.items}
-                    />
-                )}
-            />
-        </div>
+        <Table columns={columns} {...props}/>
     );
 });

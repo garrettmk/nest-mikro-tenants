@@ -7,7 +7,7 @@ export default component$(() => {
             <nav class="absolute w-80 left-0 top-0 bottom-0">
                 <Navigation/>
             </nav>
-            <main class="bg-slate-300 rounded-xl p-4 h-[calc(100vh-24px)] overflow-auto">
+            <main class="relative bg-slate-300 rounded-xl p-4 h-[calc(100vh-24px)] overflow-auto">
                 <Slot />
             </main>
             <footer class="h-[24px] dark:text-white text-center">

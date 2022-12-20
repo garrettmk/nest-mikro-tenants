@@ -1,20 +1,12 @@
-import { $, component$, useSignal, useWatch$ } from "@builder.io/qwik";
+import { $, component$ } from "@builder.io/qwik";
 import { DataFields } from "@nest-mikro-tenants/core/common";
 import { User, UsersWhereOneInput } from "@nest-mikro-tenants/core/domain";
-import { deleteOneMutation, DeleteOneMutationVariables } from "@nest-mikro-tenants/frontend/common";
 import { PencilIcon, TrashIcon } from "heroicons-qwik/24/solid";
-import { useMutation } from "qwik-urql";
-import { CancelButton } from "../buttons/cancel-button";
-import { DeleteButton } from "../buttons/delete-button";
+import { useDeleteOneMutation } from "../../hooks/use-delete-one-mutation.hook";
+import { useToggle } from "../../hooks/use-toggle.hook";
 import { MenuButton } from "../buttons/menu-button";
-import { CardSection } from "../card/card-section";
 import { MenuItem } from "../menu/menu-item";
-import { Modal } from "../modal/modal";
-import { Toolbar } from "../toolbar/toolbar";
-
-export const DeleteUserMutation = $(() => deleteOneMutation(User, UsersWhereOneInput));
-export type DeleteUserMutationVariables = DeleteOneMutationVariables<User, UsersWhereOneInput>;
-export type DeleteUserMutationData = { deleteOneUser: DataFields<User> }
+import { ConfirmDeleteModal } from "../modals/confirm-delete-modal";
 
 export interface UserActionsMenuProps {
     user: DataFields<User>
@@ -22,16 +14,12 @@ export interface UserActionsMenuProps {
 
 export const UserActionsMenu = component$((props: UserActionsMenuProps) => {
     const { user } = props;
-    const isOpen = useSignal<boolean>(false);
-    const mutation = useMutation(DeleteUserMutation, {
-        where: { id: { eq: user.id } }
-    });
-
-    useWatch$(({ track }) => {
-        track(() => mutation.data);
-
-        console.log({ data: mutation.data });
-    });
+    const [isConfirmDeleteOpen, { on$: openConfirmModal$}] = useToggle();
+    const mutation = useDeleteOneMutation(
+        $(() => User),
+        $(() => UsersWhereOneInput),
+        { where: { id: { eq: user.id } } }
+    );
 
     return (
         <>
@@ -40,23 +28,15 @@ export const UserActionsMenu = component$((props: UserActionsMenuProps) => {
                     <PencilIcon class="inline-block w-4 h-4 mr-4 text-gray-600"/>
                     Edit user
                 </MenuItem>
-                <MenuItem onClick$={() => isOpen.value = true }>
+                <MenuItem onClick$={openConfirmModal$}>
                     <TrashIcon class="inline-block w-4 h-4 mr-4 text-red-500"/>
                     Delete User
                 </MenuItem>
             </MenuButton>
-            <Modal isOpen={isOpen} onClose$={() => isOpen.value = false}>
-                <CardSection class="">
-                    <span class="block mb-4">
-                        Are you sure you want to delete { user.nickname ?? user.username } ({ user.email })?
-                        This can't be undone!
-                    </span>
-                    <Toolbar class="justify-end">
-                        <CancelButton onClick$={() => isOpen.value = false}/>
-                        <DeleteButton onClick$={mutation.delete$}/>
-                    </Toolbar>
-                </CardSection>
-            </Modal>
+            <ConfirmDeleteModal
+                isOpen={isConfirmDeleteOpen}
+                onDelete$={mutation.mutate$}
+            />
         </>
     );
 })

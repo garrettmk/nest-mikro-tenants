@@ -1,9 +1,9 @@
-import { $, component$, useStyles$ } from '@builder.io/qwik';
+import { component$, useStyles$ } from '@builder.io/qwik';
 import { QwikCityProvider, RouterOutlet, ServiceWorkerRegister } from '@builder.io/qwik-city';
 import { RouterHead } from './components/router-head/router-head';
-import { UrqlProvider } from 'qwik-urql';
-import { clientFactory } from './urql-client-factory';
 
+import { ApiProvider } from './components/api/api-provider';
+import { NotificationsProvider } from './components/notifications/notifications-provider';
 import globalStyles from './global.css?inline';
 
 export default component$(() => {
@@ -16,7 +16,7 @@ export default component$(() => {
     useStyles$(globalStyles);
 
     return (
-        <UrqlProvider client={$(clientFactory)}>
+        <ApiProvider>
             <QwikCityProvider>
                 <head>
                     <meta charSet="utf-8" />
@@ -24,10 +24,12 @@ export default component$(() => {
                     <RouterHead />
                 </head>
                 <body lang="en">
-                    <RouterOutlet />
+                    <NotificationsProvider>
+                        <RouterOutlet />
+                    </NotificationsProvider>
                     <ServiceWorkerRegister />
                 </body>
             </QwikCityProvider>
-        </UrqlProvider>
+        </ApiProvider>
     );
 });

@@ -1,22 +1,26 @@
 import { BaseModel } from "@garrettmk/class-schema";
 import { Constructor } from "@garrettmk/ts-utils";
-import { DataFields } from "@nest-mikro-tenants/core/common";
-import { User } from "@nest-mikro-tenants/core/domain";
 import { WhereOneInput } from "@nest-mikro-tenants/core/factories";
 import { gql, TypedDocumentNode } from "@urql/core";
 import { propertiesFragment } from "./properties.fragment";
 
-export type DeleteOneMutationVariables<T extends BaseModel, W extends WhereOneInput<T>> = {
+export type DeleteOneVariables<T extends BaseModel, W extends WhereOneInput<T>> = {
     where: W
+}
+
+export type DeleteOneData<T extends BaseModel, N extends string, K extends string = `deleteOne${N}`> = {
+    [k in K]: T
 }
 
 export function deleteOneMutation<
     T extends BaseModel, 
-    W extends WhereOneInput<T>
+    W extends WhereOneInput<T>,
+    N extends string
 >(
     target: Constructor<T>, 
-    whereInput: Constructor<W>
-) : TypedDocumentNode<DataFields<User>, DeleteOneMutationVariables<T, W>> {
+    whereInput: Constructor<W>,
+    name?: N
+) : TypedDocumentNode<DeleteOneData<T, N>, DeleteOneVariables<T, W>> {
     const fragmentName = `${target.name}Fields`;
     const fragment = propertiesFragment(target, fragmentName);
 

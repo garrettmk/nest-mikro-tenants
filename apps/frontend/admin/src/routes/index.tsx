@@ -1,4 +1,4 @@
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal, useContext } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { Button } from '../components/buttons/button';
 import { MenuButton } from '../components/buttons/menu-button';
@@ -6,11 +6,11 @@ import { CardSection } from '../components/card/card-section';
 import { PageHeader } from '../components/header/page-header';
 import { PageTitle } from '../components/header/page-title';
 import { MenuItem } from '../components/menu/menu-item';
-import { Modal } from '../components/modal/modal';
+import { Modal } from '../components/modals/modal';
+import { NotificationsContext } from '../components/notifications/notifications-provider';
 
 export default component$(() => {
-    const isOpen = useSignal(false);
-    const count = useSignal(0);
+    const { notify$, dismiss$ } = useContext(NotificationsContext);
 
     return (
         <>
@@ -27,17 +27,16 @@ export default component$(() => {
                     <MenuItem>Three</MenuItem>
                 </MenuButton>
 
-                <Button onClick$={() => { isOpen.value = true }}>
+                <Button onClick$={() => notify$({
+                    id: 'two',
+                    text: 'Another!'
+                })}>
                     Modal
                 </Button>
-                <Modal isOpen={isOpen} onClose$={() => isOpen.value = false}>
-                    <CardSection class="max-w-sm">
-                        Are you sure?
-                        <Button class="mt-4" onClick$={() => count.value++}>
-                            {count.value}
-                        </Button>
-                    </CardSection>
-                </Modal>
+
+                <Button onClick$={() => dismiss$('two')}>
+                    Dismiss
+                </Button>
             </section>
         </>
     );

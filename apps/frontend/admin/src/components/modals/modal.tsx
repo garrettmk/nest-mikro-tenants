@@ -11,7 +11,6 @@ export const Modal = component$((props: ModalProps) => {
 
     useWatch$(({ track }) => {
         track(() => props.isOpen?.value);
-        track(() => props.onClose$);
 
         if (!containerRef.value)
             return;
@@ -28,7 +27,10 @@ export const Modal = component$((props: ModalProps) => {
 
     const handleClickOverlay$ = $((event: QwikMouseEvent) => {
         if (event.target === containerRef.value)
-            props.onClose$?.();
+            if (props.onClose$)
+                props.onClose$();
+            else if (props.isOpen)
+                props.isOpen.value = false;
     });
 
     return (

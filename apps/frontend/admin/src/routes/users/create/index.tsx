@@ -1,9 +1,8 @@
 /* eslint-disable qwik/valid-lexical-scope */
-import { $, component$, useContextProvider } from "@builder.io/qwik";
-import { DocumentHead } from "@builder.io/qwik-city";
+import { $, component$, useContextProvider, useWatch$ } from "@builder.io/qwik";
+import { DocumentHead, useNavigate } from "@builder.io/qwik-city";
 import { User, UserCreateInput } from "@nest-mikro-tenants/core/domain";
-import { createOneMutation, UserCreateFormData } from "@nest-mikro-tenants/frontend/common";
-import { useMutation } from "qwik-urql";
+import { UserCreateFormData } from "@nest-mikro-tenants/frontend/common";
 import { Breadcrumbs } from "../../../components/breadcrumbs/breadcrumbs";
 import { CancelButton } from "../../../components/buttons/cancel-button";
 import { SaveButton } from "../../../components/buttons/save-button";
@@ -15,20 +14,37 @@ import { PageHeader } from "../../../components/header/page-header";
 import { PageTitle } from "../../../components/header/page-title";
 import { Toolbar } from "../../../components/toolbar/toolbar";
 import { FormStateContext } from "../../../contexts/form-state.context";
+import { useCreateOneMutation } from "../../../hooks/use-create-one-mutation.hook";
 import { useFormState } from "../../../hooks/use-form-state.hook";
 import { useObjectForm } from "../../../hooks/use-object-form.hook";
 
-export const CreateUserMutation = $(() => createOneMutation(User, UserCreateInput));
 
 export default component$(() => {
-    const state = useFormState();
-    useObjectForm($(() => UserCreateFormData), state);
-    useContextProvider(FormStateContext, state);
+    // Set up the form
+    const form = useFormState();
+    useObjectForm($(() => UserCreateFormData), form);
+    useContextProvider(FormStateContext, form);
 
-    const { data, error, loading, mutate$ } = useMutation(CreateUserMutation);
-    const saveUser$ = $(() => mutate$({
-        input: UserCreateInput.plainFromSync(state.result)
+    // Set up the mutation
+    const results = useCreateOneMutation(
+        $(() => User),
+        $(() => UserCreateInput)
+    );
+
+    const saveUser$ = $(() => results.mutate$({
+        input: UserCreateInput.plainFromSync(form.result)
     }));
+
+    // Navigate back to users if the mutation succeeds
+    const nav = useNavigate();
+    useWatch$(({ track }) => {
+        track(() => results.data);
+
+        if (results.data)
+            setTimeout(() => {
+                nav.path = '/users';
+            }, 500);
+    });
 
     return (
         <>
@@ -48,7 +64,7 @@ export default component$(() => {
                         href="/users"
                     />
                     <SaveButton 
-                        disabled={!state.result || loading.value}
+                        disabled={!form.result || results.loading.value}
                         onClick$={saveUser$}
                     />
                 </Toolbar>

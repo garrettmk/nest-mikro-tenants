@@ -9,22 +9,22 @@ export type UpdateOneVariables<T extends BaseModel, W extends WhereInput<T>, U e
     update: U
 }
 
-export type UpdateOneResult<T extends BaseModel, N extends string, K extends string = `updateOne${N}`> = {
+export type UpdateOneData<T extends BaseModel, N extends string, K extends string = `updateOne${N}`> = {
     [k in K]: T
 }
 
 export function updateOneMutation<
     T extends BaseModel,
-    N extends string,
     W extends WhereOneInput<T>, 
-    U extends UpdateInput<T>
+    U extends UpdateInput<T>,
+    N extends string,
 >(
     target: Constructor<T>,
-    targetName: N,
     whereOneInput: Constructor<W>,
-    updateInput: Constructor<U>
+    updateInput: Constructor<U>,
+    targetName?: N,
 ): TypedDocumentNode<
-    UpdateOneResult<T, N>,
+    UpdateOneData<T, N>,
     UpdateOneVariables<T, W, U>
 > {
 

@@ -7,7 +7,7 @@ export type GetVariables = {
     id: string;
 }
 
-export type GetResult<T extends BaseModel, N extends string, K extends string = `get${N}`> = {
+export type GetData<T extends BaseModel, N extends string, K extends string = `get${N}`> = {
     [k in K]: T
 }
 
@@ -18,7 +18,7 @@ export function getQuery<
     target: Constructor<T>,
     name?: N
 ): TypedDocumentNode<
-    GetResult<T, N>,
+    GetData<T, N>,
     GetVariables
 > {
     const fragmentName = `${target.name}Fields`;
