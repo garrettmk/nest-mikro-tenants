@@ -22,7 +22,8 @@
             "@nest-mikro-tenants/core/common": ["libs/core/common/src/index.ts"],
             "@nest-mikro-tenants/core/domain": ["libs/core/domain/src/index.ts"],
             "@nest-mikro-tenants/core/factories": ["libs/core/factories/src/index.ts"],
-            "@nest-mikro-tenants/frontend/common": ["libs/frontend/common/src/index.ts"]
+            "@nest-mikro-tenants/frontend/common": ["libs/frontend/common/src/index.ts"],
+            "@nest-mikro-tenants/frontend/qwurql": ["libs/frontend/qwurql/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]

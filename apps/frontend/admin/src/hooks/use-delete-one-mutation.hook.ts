@@ -4,7 +4,7 @@ import { Constructor } from "@garrettmk/ts-utils";
 import { WhereOneInput } from "@nest-mikro-tenants/core/factories";
 import { deleteOneMutation, DeleteOneVariables } from "@nest-mikro-tenants/frontend/common";
 import { NotificationsContext } from "../components/notifications/notifications-provider";
-import { useMutation } from "./use-mutation.hook";
+import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
 
 export function useDeleteOneMutation<
     T extends BaseModel,
@@ -27,16 +27,18 @@ export function useDeleteOneMutation<
     });
 
     // Run the mutation hook
-    const [result$, mutate$] = useMutation(mutation$, initialVars);
+    const mutation = useMutation(mutation$, initialVars);
 
     // Auto report success or error
     const { success$, error$ } = useContext(NotificationsContext);
     useWatch$(({ track }) => {
-        track(() => result$.promise);
+        const result = track(mutation.result);
 
-        result$.promise.then(() => success$(`Excellent! ${targetName.value} deleted successfully`));
-        result$.promise.catch(error$);
+        if (result.value?.error)
+            error$(result.value.error);
+        else if (result.value?.data)
+            success$(`${targetName.value} deleted successfully`);
     });
 
-    return [result$, mutate$] as const;
+    return mutation;
 }

@@ -1,9 +1,9 @@
 import { $, component$, NoSerialize, noSerialize, Slot, useContextProvider, useSignal, useStore } from "@builder.io/qwik";
 import { Client, createClient, dedupExchange, fetchExchange } from "@urql/core";
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { ApiContext, ApiState } from "../../contexts/api.context";
+import { UrqlContext, UrqlContextState } from "../contexts/urql.context";
 
-export const ApiProvider = component$(() => {
+export const UrqlProvider = component$(() => {
     const client = useSignal<NoSerialize<Client>>()
 
     const clientQrl = $(() => {
@@ -29,11 +29,11 @@ export const ApiProvider = component$(() => {
         return client.value;
     });
 
-    const state = useStore<ApiState>({
+    const state = useStore<UrqlContextState>({
         clientQrl
     });
 
-    useContextProvider(ApiContext, state);
+    useContextProvider(UrqlContext, state);
 
     return <Slot/>
 })

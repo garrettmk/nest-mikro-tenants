@@ -2,7 +2,7 @@ import { component$, useStyles$ } from '@builder.io/qwik';
 import { QwikCityProvider, RouterOutlet, ServiceWorkerRegister } from '@builder.io/qwik-city';
 import { RouterHead } from './components/router-head/router-head';
 
-import { ApiProvider } from './components/api/api-provider';
+import { UrqlProvider } from '@nest-mikro-tenants/frontend/qwurql';
 import { NotificationsProvider } from './components/notifications/notifications-provider';
 import globalStyles from './global.css?inline';
 
@@ -16,7 +16,7 @@ export default component$(() => {
     useStyles$(globalStyles);
 
     return (
-        <ApiProvider>
+        <UrqlProvider>
             <QwikCityProvider>
                 <head>
                     <meta charSet="utf-8" />
@@ -30,6 +30,6 @@ export default component$(() => {
                     <ServiceWorkerRegister />
                 </body>
             </QwikCityProvider>
-        </ApiProvider>
+        </UrqlProvider>
     );
 });

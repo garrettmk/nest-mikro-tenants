@@ -4,7 +4,8 @@ import { Constructor } from "@garrettmk/ts-utils";
 import { UpdateInput, WhereOneInput } from "@nest-mikro-tenants/core/factories";
 import { updateOneMutation, UpdateOneVariables } from "@nest-mikro-tenants/frontend/common";
 import { NotificationsContext } from "../components/notifications/notifications-provider";
-import { useMutation } from "./use-mutation.hook";
+import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
+
 
 export function useUpdateOneMutation<
     T extends BaseModel,
@@ -30,16 +31,18 @@ export function useUpdateOneMutation<
     });
 
     // Run the mutation hook
-    const [result$, mutate$] = useMutation(mutation$, initialVars);
+    const mutation = useMutation(mutation$, initialVars);
 
     // Auto report success or error
     const { success$, error$ } = useContext(NotificationsContext);
     useWatch$(({ track }) => {
-        const promise = track(() => result$.promise);
+        const result = track(mutation.result);
 
-        promise.then(() => success$(`Excellent! ${targetName.value} updated successfully`));
-        promise.catch(error$);
+        if (result.value?.error)
+            error$(result.value.error);
+        else if (result.value?.data)
+            success$(`${targetName.value} updated successfully`);
     });
 
-    return [result$, mutate$] as const;
+    return mutation;
 }

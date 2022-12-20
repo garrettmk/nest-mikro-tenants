@@ -1,4 +1,4 @@
-import { $, component$, Resource } from "@builder.io/qwik";
+import { $, component$, Resource, useWatch$ } from "@builder.io/qwik";
 import { DocumentHead } from "@builder.io/qwik-city";
 import { User, UsersWhereInput } from "@nest-mikro-tenants/core/domain";
 import { CreateButton } from "../../components/buttons/create-button";
@@ -6,13 +6,17 @@ import { PageHeader } from "../../components/header/page-header";
 import { PageTitle } from "../../components/header/page-title";
 import { Toolbar } from "../../components/toolbar/toolbar";
 import { UsersTable } from "../../components/users/users-table";
-import { useFindManyQuery } from "../../hooks/use-find-many-query.hook";
+import { useFindManyQueryResource } from "../../hooks/use-find-many-query.hook";
 
 export default component$(() => {
-    const [users$] = useFindManyQuery(
+    const query = useFindManyQueryResource(
         $(() => User),
         $(() => UsersWhereInput)
     );
+
+    useWatch$(() => {
+        query.execute$();
+    });
 
     return (
         <>
@@ -26,7 +30,7 @@ export default component$(() => {
             </PageHeader>
             <section>
                 <Resource
-                    value={users$}
+                    value={query.resource$}
                     onPending={() => <span>Pending...</span>}
                     onRejected={() => <span>:-(</span>}
                     onResolved={result => (

@@ -21,7 +21,7 @@ import { Toolbar } from "../../../components/toolbar/toolbar";
 import { FormStateContext } from "../../../contexts/form-state.context";
 import { useDeleteOneMutation } from "../../../hooks/use-delete-one-mutation.hook";
 import { useFormState } from "../../../hooks/use-form-state.hook";
-import { useGetQuery } from "../../../hooks/use-get-query.hook";
+import { useGetQueryResource } from "../../../hooks/use-get-query.hook";
 import { useObjectForm } from "../../../hooks/use-object-form.hook";
 import { useResourceLoading } from "../../../hooks/use-resource-loading.hook";
 import { useToggle } from "../../../hooks/use-toggle.hook";
@@ -31,10 +31,12 @@ import { useUpdateOneMutation } from "../../../hooks/use-update-one-mutation.hoo
 export default component$(() => {
     const location = useLocation();
     const variables = useStore<GetVariables>({ id: location.params.userId });
-    const [query$, refetch$] = useGetQuery($(() => User), variables);
+    const getUser = useGetQueryResource($(() => User), variables);
+
+    useWatch$(() => getUser.execute$());
     
     return <Resource
-        value={query$}
+        value={getUser.resource$}
         onPending={() => <LoadingOverlay/>}
         onRejected={error => <ErrorOverlay>{error + ''}</ErrorOverlay>}
         onResolved={result => <UserUpdatePage user={result.data?.getUser as User}/>}
@@ -60,21 +62,19 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
     useContextProvider(FormStateContext, form);
 
     // Set up the update mutation
-    const [saveResult, save$] = useUpdateOneMutation(
+    const updateUser = useUpdateOneMutation(
         $(() => User),
         $(() => UsersWhereOneInput),
         $(() => UserUpdateInput),
         { where: { id: { eq: user.id } } },
     );
     
-    const saveUser$ = $(() => save$({
+    const saveUser$ = $(() => updateUser.execute$({
         update: form.result!
     }));
 
-    const saveUserLoading = useResourceLoading(saveResult);
-
     // Set up the delete mutation and confirm modal
-    const [deleteResult, delete$] = useDeleteOneMutation(
+    const deleteUser = useDeleteOneMutation(
         $(() => User),
         $(() => UsersWhereOneInput),
         { where: { id: { eq: user.id } } }
@@ -82,19 +82,17 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
             
     const [isConfirmDeleteOpen, { on$: showConfirmDelete$ }] = useToggle();
 
-    const deleteUserLoading = useResourceLoading(deleteResult);
-
     // Navigate back if the mutation succeeds
     useWatch$(({ track }) => {
-        const savePromise = track(() => saveResult.promise);
-        const deletePromise = track(() => deleteResult.promise);
+        const updateResult = track(updateUser.result);
+        const deleteResult = track(deleteUser.result);
         const goBack = () => setTimeout(() => { nav.path = '/users'; }, 500);
 
-        savePromise.then(goBack);
-        deletePromise.then(goBack);
+        if (updateResult.value?.data || deleteResult.value?.data)
+            goBack();
     });
 
-    const isBusy = saveUserLoading.value || deleteUserLoading.value;
+    const isBusy = updateUser.loading.value || deleteUser.loading.value;
 
     return (
         <>

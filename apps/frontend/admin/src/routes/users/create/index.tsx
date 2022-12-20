@@ -26,21 +26,21 @@ export default component$(() => {
     useContextProvider(FormStateContext, form);
 
     // Set up the mutation
-    const results = useCreateOneMutation(
+    const createUserMutation = useCreateOneMutation(
         $(() => User),
         $(() => UserCreateInput)
     );
 
-    const saveUser$ = $(() => results.mutate$({
+    const saveUser$ = $(() => createUserMutation.execute$({
         input: UserCreateInput.plainFromSync(form.result)
     }));
 
     // Navigate back to users if the mutation succeeds
     const nav = useNavigate();
     useWatch$(({ track }) => {
-        track(() => results.data);
+        const result = track(createUserMutation.result);
 
-        if (results.data)
+        if (result.value?.data)
             setTimeout(() => {
                 nav.path = '/users';
             }, 500);
@@ -64,7 +64,7 @@ export default component$(() => {
                         href="/users"
                     />
                     <SaveButton 
-                        disabled={!form.result || results.loading.value}
+                        disabled={!form.result || createUserMutation.loading.value}
                         onClick$={saveUser$}
                     />
                 </Toolbar>

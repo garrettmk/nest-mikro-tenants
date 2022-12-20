@@ -4,9 +4,10 @@ import { Constructor } from "@garrettmk/ts-utils";
 import { WhereInput } from "@nest-mikro-tenants/core/factories";
 import { findManyQuery, FindManyVariables } from "@nest-mikro-tenants/frontend/common";
 import { NotificationsContext } from "../components/notifications/notifications-provider";
-import { useQuery } from "./use-query.hook";
+import { useQueryResource } from "@nest-mikro-tenants/frontend/qwurql";
 
-export function useFindManyQuery<
+
+export function useFindManyQueryResource<
     T extends BaseModel,
     W extends WhereInput<T>,
     V extends FindManyVariables<T, W> = FindManyVariables<T, W>
@@ -28,15 +29,14 @@ export function useFindManyQuery<
     });
 
     // Run the query hook
-    const [resource$, refetch$] = useQuery(query$, variables);
+    const query = useQueryResource(query$, variables);
 
     // Auto report errors
     const { error$ } = useContext(NotificationsContext);
     useWatch$(({ track }) => {
-        track(() => resource$.promise);
-
-        resource$.promise.catch(error => error$(error));
+        const promise = track(() => query.resource$.promise);
+        promise.catch(error => error$(error));
     });
 
-    return [resource$, refetch$] as const;
+    return query;
 }
