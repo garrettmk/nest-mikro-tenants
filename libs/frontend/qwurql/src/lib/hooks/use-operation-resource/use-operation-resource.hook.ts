@@ -17,26 +17,10 @@ import { createFetchContext, executeOperation, isResolvedState, resolveOrRejectR
  */
 export function useOperationResource<Data, Variables extends object>(
     documentQrl: OperationDocumentQrl<Variables, Data>,
-    initialVars?: Partial<Variables>
+    initialVars?: Variables
 ): UseOperationResourceResult<Data, Variables> {
     const { clientQrl } = useContext(UrqlContext);
     const state = useStore<UseOperationResourceState<Data, Variables>>({});
-
-    // Initialize the state
-    useWatch$(async () => {
-        const [client, document] = await Promise.all([
-            clientQrl(),
-            documentQrl()
-        ]);
-
-        if (!client || !document)
-            throw new Error(`Can't resolve client or document`);
-
-        state.client = noSerialize(client);
-        state.document = noSerialize(document);
-        state.operationType = getOperationType(document);
-        state.promise = noSerialize(new ControlledPromise<Serializable<OperationResult<Data, Variables>>>());
-    });
 
     // Create the operation executor
     const execute$ = $(async (vars?: Partial<Variables>) => {
@@ -54,6 +38,23 @@ export function useOperationResource<Data, Variables extends object>(
         );
 
         state.lastUnsubscribe = noSerialize(unsubscribe);
+    });
+
+    // Initialize the state
+    useWatch$(async () => {
+        const [client, document] = await Promise.all([
+            clientQrl(),
+            documentQrl()
+        ]);
+
+        if (!client || !document)
+            throw new Error(`Can't resolve client or document`);
+
+        state.client = noSerialize(client);
+        state.document = noSerialize(document);
+        state.operationType = getOperationType(document);
+        state.promise = noSerialize(new ControlledPromise<Serializable<OperationResult<Data, Variables>>>());
+        await execute$();
     });
 
     // Create a resource from the state promise

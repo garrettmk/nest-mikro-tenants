@@ -1,4 +1,4 @@
-import { $, component$, Resource, useWatch$ } from "@builder.io/qwik";
+import { $, component$, Resource } from "@builder.io/qwik";
 import { DocumentHead } from "@builder.io/qwik-city";
 import { User, UsersWhereInput } from "@nest-mikro-tenants/core/domain";
 import { CreateButton } from "../../components/buttons/create-button";
@@ -13,10 +13,6 @@ export default component$(() => {
         $(() => User),
         $(() => UsersWhereInput)
     );
-
-    useWatch$(() => {
-        query.execute$();
-    });
 
     return (
         <>

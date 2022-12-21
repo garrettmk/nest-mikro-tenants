@@ -32,8 +32,6 @@ export default component$(() => {
     const location = useLocation();
     const variables = useStore<GetVariables>({ id: location.params.userId });
     const getUser = useGetQueryResource($(() => User), variables);
-
-    useWatch$(() => getUser.execute$());
     
     return <Resource
         value={getUser.resource$}
