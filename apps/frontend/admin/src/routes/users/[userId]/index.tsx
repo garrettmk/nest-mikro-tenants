@@ -76,7 +76,7 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
         { where: { id: { eq: user.id } } }
     );
             
-    const [isConfirmDeleteOpen, { on$: showConfirmDelete$ }] = useToggle();
+    const isConfirmDeleteOpen = useToggle();
 
     // Navigate back if the mutation succeeds
     useWatch$(({ track }) => {
@@ -106,8 +106,8 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
                 <Toolbar>
                     <CancelButton href="/users"/>
                     <DeleteButton
-                        // disabled={isBusy}
-                        onClick$={showConfirmDelete$}
+                        disabled={isBusy}
+                        onClick$={isConfirmDeleteOpen.on$}
                     />
                     <SaveButton
                         disabled={!form.isModified || !form.isValid || isBusy}

@@ -1,22 +1,16 @@
 import { $, QRL, Signal, useSignal } from "@builder.io/qwik";
 
-export interface ToggleMethods {
+export interface ToggleSignal extends Signal<boolean> {
     on$: QRL<() => void>
     off$: QRL<() => void>
     toggle$: QRL<() => void>
 }
 
-export type UseToggleResult = [Signal<boolean>, ToggleMethods];
-
-export function useToggle(initialValue?: boolean): UseToggleResult {
-    const value = useSignal(initialValue ?? false);
-    const on$ = $(() => value.value = true);
-    const off$ = $(() => value.value = false);
-    const toggle$ = $(() => value.value = !value.value);
-
-    return [value, {
-        on$,
-        off$,
-        toggle$
-    }];
+export function useToggle(initialValue?: boolean): ToggleSignal {
+    const signal = useSignal(initialValue ?? false) as ToggleSignal;
+    signal.on$ = $(() => signal.value = true);
+    signal.off$ = $(() => signal.value = false);
+    signal.toggle$ = $(() => signal.value = !signal.value);
+    
+    return signal;
 }

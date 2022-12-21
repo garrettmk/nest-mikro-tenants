@@ -14,8 +14,8 @@ export interface UserActionsMenuProps {
 
 export const UserActionsMenu = component$((props: UserActionsMenuProps) => {
     const { user } = props;
-    const [isConfirmDeleteOpen, { on$: openConfirmModal$}] = useToggle();
-    const mutation = useDeleteOneMutation(
+    const isConfirmModalOpen = useToggle();
+    const deleteUser = useDeleteOneMutation(
         $(() => User),
         $(() => UsersWhereOneInput),
         { where: { id: { eq: user.id } } }
@@ -28,14 +28,14 @@ export const UserActionsMenu = component$((props: UserActionsMenuProps) => {
                     <PencilIcon class="inline-block w-4 h-4 mr-4 text-gray-600"/>
                     Edit user
                 </MenuItem>
-                <MenuItem onClick$={openConfirmModal$}>
+                <MenuItem onClick$={isConfirmModalOpen.on$}>
                     <TrashIcon class="inline-block w-4 h-4 mr-4 text-red-500"/>
                     Delete User
                 </MenuItem>
             </MenuButton>
             <ConfirmDeleteModal
-                isOpen={isConfirmDeleteOpen}
-                onDelete$={mutation.mutate$}
+                isOpen={isConfirmModalOpen}
+                onDelete$={deleteUser.execute$}
             />
         </>
     );
