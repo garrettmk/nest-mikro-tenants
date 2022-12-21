@@ -22,6 +22,11 @@ export const ConfirmDeleteModal = component$((props: ConfirmDeleteModalProps) =>
             props.isOpen.value = false;
     });
 
+    const handleDelete$ = $(() => {
+        if (props.onDelete$)
+            props.onDelete$()
+    });
+
     return (
         <Modal {...modalProps}>
             <CardSection class="">
@@ -31,7 +36,7 @@ export const ConfirmDeleteModal = component$((props: ConfirmDeleteModalProps) =>
                 </span>
                 <Toolbar class="justify-end">
                     <CancelButton onClick$={handleCancel$}/>
-                    <DeleteButton onClick$={props.onDelete$}/>
+                    <DeleteButton onClick$={handleDelete$}/>
                 </Toolbar>
             </CardSection>
         </Modal>

@@ -14,7 +14,6 @@ import { UserUpdateForm } from "../../../components/forms/user-update-form";
 import { PageHeader } from "../../../components/header/page-header";
 import { PageTitle } from "../../../components/header/page-title";
 import { ConfirmDeleteModal } from "../../../components/modals/confirm-delete-modal";
-import { DeleteUserModal } from "../../../components/modals/delete-user-modal";
 import { ErrorOverlay } from "../../../components/overlays/error-overlay";
 import { LoadingOverlay } from "../../../components/overlays/loading-overlay";
 import { Toolbar } from "../../../components/toolbar/toolbar";
@@ -23,7 +22,6 @@ import { useDeleteOneMutation } from "../../../hooks/use-delete-one-mutation.hoo
 import { useFormState } from "../../../hooks/use-form-state.hook";
 import { useGetQueryResource } from "../../../hooks/use-get-query.hook";
 import { useObjectForm } from "../../../hooks/use-object-form.hook";
-import { useResourceLoading } from "../../../hooks/use-resource-loading.hook";
 import { useToggle } from "../../../hooks/use-toggle.hook";
 import { useUpdateOneMutation } from "../../../hooks/use-update-one-mutation.hook";
 
@@ -127,9 +125,10 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
                 <UserUpdateForm/>
             </CardSection>
 
-            <DeleteUserModal
+            <ConfirmDeleteModal
+                itemName={user.nickname ?? user.username}
                 isOpen={isConfirmDeleteOpen}
-                user={user}
+                onDelete$={deleteUser.execute$}
             />
         </>
     );

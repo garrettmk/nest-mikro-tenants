@@ -1,6 +1,5 @@
 import { $, component$, NoSerialize, noSerialize, Slot, useContextProvider, useSignal, useStore } from "@builder.io/qwik";
-import { Client, createClient, dedupExchange, fetchExchange } from "@urql/core";
-import { cacheExchange } from '@urql/exchange-graphcache';
+import { Client, createClient, dedupExchange, fetchExchange, cacheExchange } from "@urql/core";
 import { UrqlContext, UrqlContextState } from "../contexts/urql.context";
 
 export const UrqlProvider = component$(() => {
@@ -15,12 +14,7 @@ export const UrqlProvider = component$(() => {
                 url: 'http://localhost:3334/graphql',
                 exchanges: [
                     dedupExchange,
-                    cacheExchange({
-                        keys: {
-                            Pagination: () => null,
-                            PaginatedUsers: () => null
-                        }
-                    }),
+                    cacheExchange,
                     fetchExchange
                 ]
             })
