@@ -1,4 +1,4 @@
-import type { UseOperationResourceState, ResolvedUseOperationResourceState } from "./use-operation-resource.types";
+import type { UseOperationResourceState, ResolvedUseOperationResourceState, UseOperationResourceOptions } from "./use-operation-resource.types";
 import { noSerialize } from "@builder.io/qwik";
 import { ControlledPromise } from "@garrettmk/ts-utils";
 import { OperationContext, OperationResult } from "@urql/core";
@@ -34,9 +34,16 @@ export function executeOperation<D, V extends object>(state: ResolvedUseOperatio
 }
 
 /** Rejects on GraphQL errors */
-export function resolveOrRejectResult<D, V extends object>(state: ResolvedUseOperationResourceState<D, V>, result: OperationResult<D, V>) {
-    if (result.error)
+export function resolveOrRejectResult<D, V extends object>(state: ResolvedUseOperationResourceState<D, V>, result: OperationResult<D, V>, options: UseOperationResourceOptions<D, V>) {
+    const { onError, onResult, onData } = options;
+
+    onResult?.(result);
+
+    if (result.error) {
+        onError?.(result.error);
         state.promise?.reject(toJSON(result.error));
-    else
+    } else {
+        onData?.(result.data!);
         state.promise?.resolve(toJSON(result));
+    }
 }

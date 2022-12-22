@@ -6,7 +6,7 @@ import { pipe, subscribe } from 'wonka';
 import { UrqlContext } from "../../contexts/urql.context";
 import { OperationDocumentQrl } from "../../types";
 import { getOperationType } from "../../utils/get-operation-type.util";
-import { UseOperationResourceResult, UseOperationResourceState } from "./use-operation-resource.types";
+import { UseOperationResourceOptions, UseOperationResourceResult, UseOperationResourceState } from "./use-operation-resource.types";
 import { createFetchContext, executeOperation, isResolvedState, resolveOrRejectResult, unsubscribeLast } from "./use-operation-resource.utils";
 
 /**
@@ -18,7 +18,19 @@ import { createFetchContext, executeOperation, isResolvedState, resolveOrRejectR
 export function useOperationResource<Data, Variables extends object>(
     documentQrl: OperationDocumentQrl<Variables, Data>,
     initialVars?: Variables
+): UseOperationResourceResult<Data, Variables>;
+
+export function useOperationResource<Data, Variables extends object>(
+    options: UseOperationResourceOptions<Data, Variables>
+): UseOperationResourceResult<Data, Variables>;
+
+export function useOperationResource<Data, Variables extends object>(
+    optionsOrDocumentQrl: UseOperationResourceOptions<Data, Variables> | OperationDocumentQrl<Variables, Data>,
+    variables?: Variables
 ): UseOperationResourceResult<Data, Variables> {
+    const options = typeof optionsOrDocumentQrl === 'function' ? { operation: optionsOrDocumentQrl, variables } : optionsOrDocumentQrl;
+    const { operation: documentQrl, variables: initialVars, onExecute } = options;
+
     const { clientQrl } = useContext(UrqlContext);
     const state = useStore<UseOperationResourceState<Data, Variables>>({});
 
@@ -32,9 +44,10 @@ export function useOperationResource<Data, Variables extends object>(
         const context = createFetchContext(state);
         const variables = { ...initialVars, ...vars } as Variables;
 
+        onExecute?.(variables);
         const { unsubscribe } = pipe(
             executeOperation(state, variables, context),
-            subscribe(result => resolveOrRejectResult(state, result))
+            subscribe(result => resolveOrRejectResult(state, result, options))
         );
 
         state.lastUnsubscribe = noSerialize(unsubscribe);

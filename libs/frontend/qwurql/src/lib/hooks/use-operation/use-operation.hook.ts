@@ -5,17 +5,8 @@ import { UrqlContext } from "../../contexts/urql.context";
 import { OperationDocumentQrl } from '../../types';
 import { getOperationType } from "../../utils/get-operation-type.util";
 import { toJSON } from "../../utils/to-json.util";
-import { UseOperationResult, UseOperationState } from "./use-operation.types";
+import { UseOperationOptions, UseOperationResult, UseOperationState } from "./use-operation.types";
 import { executeOperation, isResolvedState } from "./use-operation.utils";
-
-export interface UseOperationOptions<Data, Variables extends object> {
-    operation: OperationDocumentQrl<Variables, Data>
-    variables?: Partial<Variables>
-    onExecute?: QRL<(variables: Variables) => void>
-    onResult?: QRL<(result: OperationResult<Data, Variables>) => void>
-    onError?: QRL<(error: any) => void>
-    onData?: QRL<(data: NonNullable<OperationResult<Data, Variables>['data']>) => void>
-}
 
 /**
  * 
