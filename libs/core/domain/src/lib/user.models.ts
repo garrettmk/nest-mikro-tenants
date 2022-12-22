@@ -5,6 +5,7 @@ import {
   BaseObjectConstructor,
   Class,
   Constraints,
+  Email,
   entity,
   hidden,
   input,
@@ -30,6 +31,8 @@ import { Tenant } from './tenant.models';
 import { faker } from '@faker-js/faker';
 import { shake, mapValues } from 'radash';
 import { IsEmail } from 'class-validator';
+import { decorateProperties } from '@nest-mikro-tenants/core/common';
+
 
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
@@ -39,23 +42,16 @@ export class User extends BaseModel {
   @Property(() => String, { unique, minLength: 2, description: "The user's unique username" })
   username!: string;
 
-  @IsEmail()
-  @Property(() => String, { unique, description: "The user's unique email address" })
+  @Property(() => Email, { unique, description: "The user's unique email address" })
   email!: string;
   
   @Property(() => String, { hidden, description: "The user's password" })
   password!: string;
   
-  @Property(() => Date, {
-    default: () => new Date(),
-    description: 'The datetime this user was created',
-  })
+  @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was created' })
   createdAt!: Date;
   
-  @Property(() => Date, {
-    default: () => new Date(),
-    description: 'The datetime this user was last updated',
-  })
+  @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was last updated' })
   updatedAt!: Date;
   
   // Relations

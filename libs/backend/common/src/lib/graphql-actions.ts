@@ -1,4 +1,4 @@
-import { and, ClassContext, ClassMetadata, ClassMetadataManager, decorateClassWith, decoratePropertyWith, Float, getTypeInfo, hidden, Id, input, Int, not, or, output, PropertyMetadata, TypeFn, withPropertiesMetadata } from "@garrettmk/class-schema";
+import { Email, and, ClassContext, ClassMetadata, ClassMetadataManager, decorateClassWith, decoratePropertyWith, Float, getTypeInfo, hidden, Id, input, Int, not, or, output, PropertyMetadata, TypeFn, withPropertiesMetadata } from "@garrettmk/class-schema";
 import { always, applyToProperties, breakAction, ifMetadata, matchesMetadata, MetadataActionSet, MetadataSelector, MetadataTypeGuard, option, PropertyContext } from "@garrettmk/metadata-actions";
 import { Constructor } from '@garrettmk/ts-utils';
 import { Field, Float as GqlFloat, ID as GqlId, InputType as GqlInputType, Int as GqlInt, ObjectType as GqlObjectType, ReturnTypeFunc, ReturnTypeFuncValue } from '@nestjs/graphql';
@@ -10,7 +10,8 @@ const gqlTypeMap = new Map<Constructor, ReturnTypeFuncValue>([
     [Id, GqlId],
     [Int, GqlInt],
     [Float, GqlFloat],
-    [RegExp, String]
+    [RegExp, String],
+    [Email, String]
 ]);
 
 /**

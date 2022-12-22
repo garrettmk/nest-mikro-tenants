@@ -1,4 +1,4 @@
-import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, ClassMetadataManager, entity, getTypeInfo, Id, isBuiltInField, isPrimaryKeyField, PropertyMetadata, withPropertiesMetadata } from "@garrettmk/class-schema";
+import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, ClassMetadataManager, Email, entity, extendsBuiltInField, getTypeInfo, Id, innerTypeExtends, isBuiltInField, isPrimaryKeyField, or, PropertyMetadata, withPropertiesMetadata } from "@garrettmk/class-schema";
 import { always, applyToProperties, ifMetadata, matchesMetadata, MetadataActionSet, option, transformContext } from "@garrettmk/metadata-actions";
 import { Constructor, doesExtend, MaybeArray } from "@garrettmk/ts-utils";
 import { EntitySchema } from "@mikro-orm/core";
@@ -28,7 +28,7 @@ export const EntityActions = new MetadataActionSet<ClassMetadata, Constructor>(C
                             });
                         }),
 
-                        option(isBuiltInField, (meta, ctx) => {
+                        option(extendsBuiltInField, (meta, ctx) => {
                             const { innerType, isArray } = getTypeInfo(meta.type);
 
                             Object.assign(ctx.entity.properties, {
@@ -36,6 +36,7 @@ export const EntityActions = new MetadataActionSet<ClassMetadata, Constructor>(C
                                     type: innerType,
                                     array: isArray,
                                     nullable: meta.optional,
+                                    // @ts-expect-error unique only exists on scalar fields but it won't matter here
                                     unique: meta.unique,
                                     comment: meta.description,
                                     onCreate: meta.default,
