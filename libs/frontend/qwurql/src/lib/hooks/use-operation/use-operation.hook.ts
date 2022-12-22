@@ -1,22 +1,19 @@
-import { $, noSerialize, QRL, useContext, useSignal, useStore, useWatch$ } from "@builder.io/qwik";
+import { $, useSignal } from "@builder.io/qwik";
 import { Serializable } from "@nest-mikro-tenants/core/common";
 import { OperationResult } from "@urql/core";
-import { UrqlContext } from "../../contexts/urql.context";
 import { OperationDocumentQrl } from '../../types';
-import { getOperationType } from "../../utils/get-operation-type.util";
-import { toJSON } from "../../utils/to-json.util";
-import { UseOperationOptions, UseOperationResult, UseOperationState } from "./use-operation.types";
-import { executeOperation, isResolvedState } from "./use-operation.utils";
+import { UseOperationOptions, UseOperationResult } from "./use-operation.types";
+import { executeOperation, getContext, getVariables, isResolvedState, resolveOrRejectResult, useOperationState } from "./use-operation.utils";
 
 /**
  * 
- * @param documentQrl 
- * @param initialVars 
+ * @param operation$ 
+ * @param variables 
  * @returns 
  */
 export function useOperation<Data, Variables extends object>(
-    documentQrl: OperationDocumentQrl<Variables, Data>,
-    initialVars?: Partial<Variables>
+    operation$: OperationDocumentQrl<Variables, Data>,
+    variables?: Partial<Variables>
 ): UseOperationResult<Data, Variables>;
 
 export function useOperation<Data, Variables extends object>(
@@ -24,53 +21,21 @@ export function useOperation<Data, Variables extends object>(
 ): UseOperationResult<Data, Variables>;
 
 export function useOperation<Data, Variables extends object>(optionsOrQrl: UseOperationOptions<Data, Variables> | OperationDocumentQrl<Variables, Data>, variables?: Partial<Variables>): UseOperationResult<Data, Variables> {
-    const options = typeof optionsOrQrl === 'function' ? { operation: optionsOrQrl, variables } : optionsOrQrl;
-    const { operation: documentQrl, variables: initialVars, onExecute, onResult, onData, onError } = options;
-
-    const { clientQrl } = useContext(UrqlContext);
-    const state = useStore<UseOperationState<Data, Variables>>({});
+    const options = typeof optionsOrQrl === 'function' ? { operation$: optionsOrQrl, variables } : optionsOrQrl;
+    const state = useOperationState(options);
     const result = useSignal<Serializable<OperationResult<Data, Variables>>>();
     const loading = useSignal<boolean>(false);
-
-    // Initialize the state
-    useWatch$(async () => {
-        const [client, document] = await Promise.all([
-            clientQrl(),
-            documentQrl()
-        ]);
-
-        if (!client || !document)
-            throw new Error(`Can't resolve client or document`);
-
-        const operationType = getOperationType(document);
-        if (operationType === 'subscription')
-            throw new Error(`This hook does not support subscriptions`);
-
-        state.client = noSerialize(client);
-        state.document = noSerialize(document);
-        state.operationType = operationType;
-    });
 
     // Create the operation executor
     const execute$ = $(async (vars?: Partial<Variables>) => {
         if (!isResolvedState(state))
             throw new Error(`Client or document hasn't resolved yet`);
 
-        const variables = { ...initialVars, ...vars } as Variables;
-        onExecute?.(variables);
+        const variables = await getVariables(state, vars);
+        const context = getContext(state);
 
-        const operationResult = await executeOperation(state, variables).toPromise();
-        onResult?.(operationResult);
-
-        if (operationResult.error && onError)
-            onError(operationResult.error);
-        else if (operationResult.error)
-            throw operationResult.error;
-
-        if (operationResult.data)
-            onData?.(operationResult.data);
-
-        result.value = toJSON(operationResult);
+        const operationResult = await executeOperation(state, variables, context).toPromise();
+        result.value = await resolveOrRejectResult(state, operationResult);
     });
 
 
