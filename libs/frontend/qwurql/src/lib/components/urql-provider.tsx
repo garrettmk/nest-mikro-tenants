@@ -11,7 +11,7 @@ export const UrqlProvider = component$(() => {
 
         client.value = noSerialize(
             createClient({
-                url: 'http://localhost:3334/graphql',
+                url: 'http://localhost:3333/graphql',
                 exchanges: [
                     dedupExchange,
                     cacheExchange,
