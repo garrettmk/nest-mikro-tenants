@@ -1,8 +1,9 @@
-import { $, component$, Resource, useContextProvider, useStore, useWatch$ } from "@builder.io/qwik";
+import { $, component$, Resource, useContextProvider, useStore } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
 import { DataFields } from "@nest-mikro-tenants/core/common";
 import { User, UsersWhereOneInput, UserUpdateInput } from "@nest-mikro-tenants/core/domain";
-import { GetVariables } from "@nest-mikro-tenants/frontend/common";
+import { deleteOneMutation, getQuery, GetVariables, updateOneMutation } from "@nest-mikro-tenants/frontend/common";
+import { useMutation, useQueryResource } from "@nest-mikro-tenants/frontend/qwurql";
 import { Breadcrumbs } from "../../../components/breadcrumbs/breadcrumbs";
 import { CancelButton } from "../../../components/buttons/cancel-button";
 import { DeleteButton } from "../../../components/buttons/delete-button";
@@ -18,32 +19,31 @@ import { ErrorOverlay } from "../../../components/overlays/error-overlay";
 import { LoadingOverlay } from "../../../components/overlays/loading-overlay";
 import { Toolbar } from "../../../components/toolbar/toolbar";
 import { FormStateContext } from "../../../contexts/form-state.context";
-import { useDeleteOneMutation } from "../../../hooks/use-delete-one-mutation.hook";
 import { useFormState } from "../../../hooks/use-form-state.hook";
-import { useGetQueryResource } from "../../../hooks/use-get-query.hook";
+import { useNotify } from "../../../hooks/use-notify.hook";
 import { useObjectForm } from "../../../hooks/use-object-form.hook";
 import { useToggle } from "../../../hooks/use-toggle.hook";
-import { useUpdateOneMutation } from "../../../hooks/use-update-one-mutation.hook";
 
+/** Queries and mutations */
+export const getUserQuery$ = $(() => getQuery(User));
+export const updateUserMutation$ = $(() => updateOneMutation(User, UsersWhereOneInput, UserUpdateInput));
+export const deleteUserMutation$ = $(() => deleteOneMutation(User, UsersWhereOneInput));
 
+/** Data wrapper */
 export default component$(() => {
     const location = useLocation();
     const variables = useStore<GetVariables>({ id: location.params.userId });
-    const getUser = useGetQueryResource($(() => User), variables);
+    const getUser = useQueryResource(getUserQuery$, variables);
     
     return <Resource
         value={getUser.resource$}
         onPending={() => <LoadingOverlay/>}
         onRejected={error => <ErrorOverlay>{error + ''}</ErrorOverlay>}
         onResolved={result => <UserUpdatePage user={result.data?.getUser as User}/>}
-        // onResolved={result => (
-        //     <pre>
-        //         {JSON.stringify(result, null, '  ')}
-        //     </pre>
-        // )}
     />
 });
 
+/** Main page component */
 export interface UserUpdatePageProps {
     user: DataFields<User>
 }
@@ -51,6 +51,8 @@ export interface UserUpdatePageProps {
 export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
     const { user } = props;
     const nav = useNavigate();
+    const notify = useNotify();
+    const goBack$ = $(() => setTimeout(() => { nav.path = '/users'; }, 1000));
     
     // Set up the form
     const form = useFormState(() => UserUpdateInput.plainFromSync(user));
@@ -58,35 +60,25 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
     useContextProvider(FormStateContext, form);
 
     // Set up the update mutation
-    const updateUser = useUpdateOneMutation(
-        $(() => User),
-        $(() => UsersWhereOneInput),
-        $(() => UserUpdateInput),
-        { where: { id: { eq: user.id } } },
-    );
-    
-    const saveUser$ = $(() => updateUser.execute$({
-        update: form.result!
-    }));
-
-    // Set up the delete mutation and confirm modal
-    const deleteUser = useDeleteOneMutation(
-        $(() => User),
-        $(() => UsersWhereOneInput),
-        { where: { id: { eq: user.id } } }
-    );
-            
-    const isConfirmDeleteOpen = useToggle();
-
-    // Navigate back if the mutation succeeds
-    useWatch$(({ track }) => {
-        const updateResult = track(updateUser.result);
-        const deleteResult = track(deleteUser.result);
-        const goBack = () => setTimeout(() => { nav.path = '/users'; }, 500);
-
-        if (updateResult.value?.data || deleteResult.value?.data)
-            goBack();
+    const updateUser = useMutation({
+        operation$: updateUserMutation$,
+        variables: $(() => ({ where: { id: { eq: user.id } }, update: form.result! })),
+        onData$: $(() => { notify.success$('User saved'); goBack$() }),
+        onError$: notify.error$
     });
+
+    
+    // Set up the delete mutation and confirm modal
+    const isConfirmDeleteOpen = useToggle();
+    
+    const deleteUser = useMutation({
+        operation$: deleteUserMutation$,
+        variables: { where: { id: { eq: user.id } } },
+        onExecute$: isConfirmDeleteOpen.off$,
+        onData$: $(() => { notify.success$('User deleted'); goBack$() }),
+        onError$: notify.error$
+    });
+            
 
     const isBusy = updateUser.loading.value || deleteUser.loading.value;
 
@@ -111,7 +103,7 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
                     />
                     <SaveButton
                         disabled={!form.isModified || !form.isValid || isBusy}
-                        onClick$={saveUser$}
+                        onClick$={$(() => updateUser.execute$())}
                     />
                 </Toolbar>
             </PageHeader>

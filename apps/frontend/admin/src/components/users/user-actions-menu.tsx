@@ -1,5 +1,5 @@
 import { $, component$ } from "@builder.io/qwik";
-import { DataFields } from "@nest-mikro-tenants/core/common";
+import { Serializable } from "@nest-mikro-tenants/core/common";
 import { User, UsersWhereOneInput } from "@nest-mikro-tenants/core/domain";
 import { deleteOneMutation } from "@nest-mikro-tenants/frontend/common";
 import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
@@ -10,18 +10,19 @@ import { MenuItem } from "../menu/menu-item";
 import { ConfirmDeleteModal } from "../modals/confirm-delete-modal";
 
 export interface UserActionsMenuProps {
-    user: DataFields<User>
+    user: Serializable<User>
 }
 
-export const deleteUserMutation = $(() => deleteOneMutation(User, UsersWhereOneInput));
+export const deleteUserMutation$ = $(() => deleteOneMutation(User, UsersWhereOneInput));
 
 export const UserActionsMenu = component$((props: UserActionsMenuProps) => {
     const { user } = props;
     const isConfirmModalOpen = useToggle();
     const deleteUser = useMutation({
-        operation: deleteUserMutation,
+        operation$: deleteUserMutation$,
         variables: { where: { id: { eq: user.id } } },
-        onExecute: isConfirmModalOpen.off$
+        onExecute$: isConfirmModalOpen.off$,
+        context: { additionalTypenames: ['User'] }
     });
 
     return (
