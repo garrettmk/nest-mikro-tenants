@@ -11,12 +11,12 @@ export interface UseOperationState<Data, Variables extends object> {
     client?: NoSerialize<Client>
     operation?: NoSerialize<TypedDocumentNode<Data, Variables>>
     operationType?: Exclude<OperationTypeNode, 'subscription'>
-    variables?: Partial<Variables>
+    variables?: Partial<Variables> | QRL<() => Partial<Variables>>
     context?: Partial<OperationContext>
     onExecute$?: QRL<(variables: Variables) => Variables | void>
     onResult$?: QRL<(result: OperationResult<Data, Variables>) => void>
     onError$?: QRL<(error: any) => void>
-    onData$?: QRL<(data: NonNullable<OperationResult<Data, Variables>['data']>) => void>
+    onData$?: QRL<(data: OperationResult<Data, Variables>['data']) => void>
 }
 
 /** Internal hook state with everything resolved */
@@ -27,12 +27,12 @@ export type ResolvedUseOperationState<Data, Variables extends object> =
 /** Full hook parameters */
 export type UseOperationOptions<Data, Variables extends object> = {
     operation$: OperationDocumentQrl<Variables, Data>
-    variables?: Partial<Variables>
+    variables?: Partial<Variables> | QRL<() => Partial<Variables>>
     context?: Partial<OperationContext>
-    onExecute$?: QRL<(variables: Variables) => Variables | void>
+    onExecute$?: QRL<(variables: Variables) => void>
     onResult$?: QRL<(result: OperationResult<Data, Variables>) => void>
     onError$?: QRL<(error: any) => void>
-    onData$?: QRL<(data: NonNullable<OperationResult<Data, Variables>['data']>) => void>
+    onData$?: QRL<(data: OperationResult<Data, Variables>['data']) => void>
 }
     
 

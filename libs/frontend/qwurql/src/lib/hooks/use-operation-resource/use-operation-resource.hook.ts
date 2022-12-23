@@ -1,13 +1,10 @@
-import { $, noSerialize, useContext, useResource$, useStore, useWatch$ } from "@builder.io/qwik";
-import { ControlledPromise } from "@garrettmk/ts-utils";
+import { $, noSerialize, useResource$ } from "@builder.io/qwik";
 import { Serializable } from "@nest-mikro-tenants/core/common";
 import { OperationResult } from "@urql/core";
 import { pipe, subscribe } from 'wonka';
-import { UrqlContext } from "../../contexts/urql.context";
 import { OperationDocumentQrl } from "../../types";
-import { getOperationType } from "../../utils/get-operation-type.util";
-import { UseOperationResourceOptions, UseOperationResourceResult, UseOperationResourceState } from "./use-operation-resource.types";
-import { createFetchContext, executeOperation, isResolvedState, resolveOrRejectResult, unsubscribeLast } from "./use-operation-resource.utils";
+import { UseOperationResourceOptions, UseOperationResourceResult } from "./use-operation-resource.types";
+import { executeOperation, getContext, getVariables, isResolvedState, resolveOrRejectResult, unsubscribeLast, useOperationResourceState } from "./use-operation-resource.utils";
 
 /**
  * 
@@ -25,14 +22,14 @@ export function useOperationResource<Data, Variables extends object>(
 ): UseOperationResourceResult<Data, Variables>;
 
 export function useOperationResource<Data, Variables extends object>(
-    optionsOrDocumentQrl: UseOperationResourceOptions<Data, Variables> | OperationDocumentQrl<Variables, Data>,
+    optionsOrQrl: UseOperationResourceOptions<Data, Variables> | OperationDocumentQrl<Variables, Data>,
     variables?: Variables
 ): UseOperationResourceResult<Data, Variables> {
-    const options = typeof optionsOrDocumentQrl === 'function' ? { operation: optionsOrDocumentQrl, variables } : optionsOrDocumentQrl;
-    const { operation: documentQrl, variables: initialVars, onExecute } = options;
+    const options: UseOperationResourceOptions<Data, Variables> = typeof optionsOrQrl === 'function' 
+        ? { operation$: optionsOrQrl, variables } 
+        : optionsOrQrl;
 
-    const { clientQrl } = useContext(UrqlContext);
-    const state = useStore<UseOperationResourceState<Data, Variables>>({});
+    const state = useOperationResourceState(options);
 
     // Create the operation executor
     const execute$ = $(async (vars?: Partial<Variables>) => {
@@ -41,39 +38,26 @@ export function useOperationResource<Data, Variables extends object>(
 
         unsubscribeLast(state);
 
-        const context = createFetchContext(state);
-        const variables = { ...initialVars, ...vars } as Variables;
+        const variables = await getVariables(state, vars);
+        const context = getContext(state);
 
-        onExecute?.(variables);
         const { unsubscribe } = pipe(
-            executeOperation(state, variables, context),
-            subscribe(result => resolveOrRejectResult(state, result, options))
+            await executeOperation(state, variables, context),
+            subscribe(result => resolveOrRejectResult(state, result))
         );
 
         state.lastUnsubscribe = noSerialize(unsubscribe);
     });
 
-    // Initialize the state
-    useWatch$(async () => {
-        const [client, document] = await Promise.all([
-            clientQrl(),
-            documentQrl()
-        ]);
-
-        if (!client || !document)
-            throw new Error(`Can't resolve client or document`);
-
-        state.client = noSerialize(client);
-        state.document = noSerialize(document);
-        state.operationType = getOperationType(document);
-        state.promise = noSerialize(new ControlledPromise<Serializable<OperationResult<Data, Variables>>>());
-        await execute$();
-    });
-
     // Create a resource from the state promise
-    const resource$ = useResource$<Serializable<OperationResult<Data, Variables>>>(({ track }) => {
-        track(() => state.promise);
-        return state.promise ?? new ControlledPromise();
+    const resource$ = useResource$<Serializable<OperationResult<Data, Variables>>>(async ({ track }) => {
+        const lastUnsubscribe = track(() => state.lastUnsubscribe);
+        const promise = track(() => state.promise);
+
+        if (!lastUnsubscribe)
+            await execute$();
+
+        return promise!;
     });
 
     return { resource$, execute$ };

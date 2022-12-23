@@ -1,16 +1,17 @@
 import { noSerialize, Signal, useContext, useStore, useWatch$ } from "@builder.io/qwik";
+import { ControlledPromise } from "@garrettmk/ts-utils";
 import { Serializable } from "@nest-mikro-tenants/core/common";
 import { OperationContext, OperationResult } from "@urql/core";
 import { UrqlContext } from "../../contexts/urql.context";
 import { getOperationType } from "../../utils/get-operation-type.util";
 import { toJSON } from "../../utils/to-json.util";
-import type { ResolvedUseLiveOperationState, UseLiveOperationState } from "./use-live-operation.types";
-import { UseLiveOperationOptions } from "./use-live-operation.types";
+import type { ResolvedUseLiveOperationResourceState, UseLiveOperationResourceState } from "./use-live-operation-resource.types";
+import { UseLiveOperationResourceOptions } from "./use-live-operation-resource.types";
 
 /** Resolve the client, operation document, operation type, and store other options in state */
-export function useLiveOperationState<Data, Variables extends object>(options: UseLiveOperationOptions<Data, Variables>): UseLiveOperationState<Data, Variables> {
+export function useLiveOperationResourceState<Data, Variables extends object>(options: UseLiveOperationResourceOptions<Data, Variables>): UseLiveOperationResourceState<Data, Variables> {
     const { clientQrl } = useContext(UrqlContext);
-    const state = useStore<UseLiveOperationState<Data, Variables>>({});
+    const state = useStore<UseLiveOperationResourceState<Data, Variables>>({});
 
     useWatch$(async () => {
         const { operation$, ...otherOptions } = options;
@@ -26,6 +27,7 @@ export function useLiveOperationState<Data, Variables extends object>(options: U
         state.client = noSerialize(client);
         state.operation = noSerialize(operation);
         state.operationType = getOperationType(operation);
+        state.promise = noSerialize(new ControlledPromise());
         Object.assign(state, otherOptions);
     });
 
@@ -33,12 +35,12 @@ export function useLiveOperationState<Data, Variables extends object>(options: U
 }
 
 /** Type guard to make sure everything is resolved */
-export function isResolvedState<Data, Variables extends object>(state: UseLiveOperationState<Data, Variables>): state is ResolvedUseLiveOperationState<Data, Variables> {
+export function isResolvedState<Data, Variables extends object>(state: UseLiveOperationResourceState<Data, Variables>): state is ResolvedUseLiveOperationResourceState<Data, Variables> {
     return Boolean(state.client && state.operation && state.operationType);
 }
 
 /** Resolve the request variables */
-export async function getVariables<Data, Variables extends object>(state: UseLiveOperationState<Data, Variables>, variables?: Partial<Variables>): Promise<Variables> {
+export async function getVariables<Data, Variables extends object>(state: UseLiveOperationResourceState<Data, Variables>, variables?: Partial<Variables>): Promise<Variables> {
     const initialVariables =
         typeof state.variables === 'function' ? await state.variables() :
         typeof state.variables === 'object' ? state.variables :
@@ -48,7 +50,7 @@ export async function getVariables<Data, Variables extends object>(state: UseLiv
 }
 
 /** Unsubscribes from the previous query */
-export function unsubscribeLast(state: ResolvedUseLiveOperationState<any, any>) {
+export function unsubscribeLast(state: ResolvedUseLiveOperationResourceState<any, any>) {
         state.lastUnsubscribe?.();
 }
 
@@ -63,7 +65,7 @@ export function createFetchContext<D, V extends object>(loading: Signal<boolean>
 }
 
 /** Execute the operation on the urql client */
-export async function executeOperation<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, variables: V, context?: Partial<OperationContext>) {
+export async function executeOperation<D, V extends object>(state: ResolvedUseLiveOperationResourceState<D, V>, variables: V, context?: Partial<OperationContext>) {
     const { client, operationType, operation, onExecute$ } = state;
 
     await onExecute$?.(variables);
@@ -72,7 +74,7 @@ export async function executeOperation<D, V extends object>(state: ResolvedUseLi
 }
 
 /** Handle results  */
-export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, result: OperationResult<D, V>): Promise<Serializable<OperationResult<D, V>>> {
+export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationResourceState<D, V>, result: OperationResult<D, V>): Promise<Serializable<OperationResult<D, V>>> {
     const { onResult$, onError$, onData$ } = state;
 
     await onResult$?.(result);

@@ -46,13 +46,12 @@ export function isResolvedState<Data, Variables extends object>(state: UseOperat
 
 /** Resolve the request variables */
 export async function getVariables<Data, Variables extends object>(state: UseOperationState<Data, Variables>, variables?: Partial<Variables>): Promise<Variables> {
-    const { onExecute$ } = state;
-    const combinedVariables = { ...state.variables, ...variables } as Variables;
+    const initialVariables = 
+        typeof state.variables === 'function' ? await state.variables() :
+        typeof state.variables === 'object' ? state.variables :
+        {};
 
-    if (onExecute$)
-        return (await onExecute$(combinedVariables)) ?? combinedVariables;
-
-    return combinedVariables;
+    return { ...initialVariables, ...variables } as Variables;
 }
 
 /** Resolve the request context */
@@ -61,10 +60,11 @@ export function getContext<Data, Variables extends object>(state: UseOperationSt
 }
 
 /** Execute the operation on the urql client */
-export function executeOperation<D, V extends object>(state: ResolvedUseOperationState<D, V>, variables: V, context?: Partial<OperationContext>) {
-    const { client, operationType, operation: document } = state;
-
-    return client[operationType](document, variables, context);
+export async function executeOperation<D, V extends object>(state: ResolvedUseOperationState<D, V>, variables: V, context?: Partial<OperationContext>) {
+    const { client, operationType, operation, onExecute$ } = state;
+    
+    await onExecute$?.(variables);
+    return client[operationType](operation, variables, context);
 }
 
 /** Return the result, or throw an error */
@@ -77,7 +77,7 @@ export async function resolveOrRejectResult<Data, Variables extends object>(stat
         await onError$(result.error);
     else if (result.error)
         throw result.error;
-    else if (result.data && onData$)
+    else if (onData$)
         await onData$(result.data);
 
     return toJSON(result);

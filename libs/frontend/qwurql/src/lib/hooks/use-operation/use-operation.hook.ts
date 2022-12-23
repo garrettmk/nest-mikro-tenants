@@ -34,7 +34,9 @@ export function useOperation<Data, Variables extends object>(optionsOrQrl: UseOp
         const variables = await getVariables(state, vars);
         const context = getContext(state);
 
-        const operationResult = await executeOperation(state, variables, context).toPromise();
+        const source = await executeOperation(state, variables, context);
+        const operationResult = await source.toPromise();
+
         result.value = await resolveOrRejectResult(state, operationResult);
     });
 
