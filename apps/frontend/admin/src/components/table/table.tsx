@@ -37,7 +37,10 @@ export const Table = component$((props: TableProps) => {
             <thead class="uppercase text-xs text-gray-600">
                 <tr>
                     {columns.map(column => (
-                        <td class={column.classes}>{column.label}</td>
+                        <td
+                            key={column.dataKey ?? column.label}
+                            className={column.classes}>{column.label}
+                        </td>
                     ))}
                 </tr>
             </thead>

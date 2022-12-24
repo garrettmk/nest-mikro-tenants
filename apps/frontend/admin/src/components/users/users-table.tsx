@@ -1,5 +1,5 @@
 import { $, component$ } from "@builder.io/qwik";
-import { DataFields } from "@nest-mikro-tenants/core/common";
+import { Serializable } from "@nest-mikro-tenants/core/common";
 import { User } from "@nest-mikro-tenants/core/domain";
 import { Table, TableColumn, TableProps } from "../table/table";
 import { UserActionsMenu } from "./user-actions-menu";
@@ -11,7 +11,7 @@ export function toLocaleDateString(value: unknown): string {
 }
 
 export interface UsersTableProps extends Omit<TableProps, 'items' | 'columns'> {
-    items?: User[]
+    items?: Serializable<User>[]
 }
 
 export const UsersTable = component$((props: UsersTableProps) => {
@@ -46,10 +46,10 @@ export const UsersTable = component$((props: UsersTableProps) => {
         {
             label: 'Actions',
             classes: 'flex justify-center',
-            format: $((user) => <UserActionsMenu user={user as DataFields<User>}/>)
+            format: $((user) => <UserActionsMenu user={user as Serializable<User>}/>)
         }
     ];
-
+    
     return (
         <Table columns={columns} {...props}/>
     );
