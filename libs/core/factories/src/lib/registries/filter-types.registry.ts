@@ -1,6 +1,5 @@
-import { BaseObjectConstructor, CommonPropertyMetadata, Float, getTypeInfo, Id, Int, TypeFn } from '@garrettmk/class-schema';
+import { BaseObjectConstructor, CommonPropertyMetadata, Email, Float, getTypeInfo, Id, Int, TypeFn } from '@garrettmk/class-schema';
 import { MetadataManagerClass } from '@garrettmk/metadata-manager';
-import { Constructor } from '@garrettmk/ts-utils';
 import { BooleanFilterInput } from '../objects/boolean-filter-input.object';
 import { DateFilterInput } from '../objects/date-filter-input.object';
 import { FloatFilterInput } from '../objects/float-filter-input.object';
@@ -15,7 +14,7 @@ export type FilterTypeMetadata = {
 };
 
 
-const staticFilterMappings: [Constructor, FilterTypeMetadata][] = [
+const staticFilterMappings: [unknown, FilterTypeMetadata][] = [
   [Boolean, { filterType: BooleanFilterInput }],
   [Date, { filterType: DateFilterInput }],
   [Float, { filterType: FloatFilterInput }],
@@ -23,33 +22,34 @@ const staticFilterMappings: [Constructor, FilterTypeMetadata][] = [
   [Int, { filterType: IntFilterInput }],
   [Number, { filterType: NumberFilterInput }],
   [String, { filterType: StringFilterInput }],
+  [Email, { filterType: StringFilterInput }]
 ];
 
 
-export class FilterTypesRegistry extends MetadataManagerClass<FilterTypeMetadata, Constructor>(staticFilterMappings) {
-  static getFilterType(target: Constructor) {
+export class FilterTypesRegistry extends MetadataManagerClass<FilterTypeMetadata, unknown>(staticFilterMappings) {
+  static getFilterType(target: unknown) {
     const { filterType } = this.getMetadata(target);
     return filterType;
   }
 
-  static getFilterTypeFn(targetFn: TypeFn): TypeFn<Constructor> {
+  static getFilterTypeFn(targetFn: TypeFn): TypeFn {
     return () => {
       const { innerType } = getTypeInfo(targetFn);
-      return this.getFilterType(innerType as Constructor);
+      return this.getFilterType(innerType);
     }
   }
 
-  static setFilterType(target: Constructor, filterType: BaseObjectConstructor) {
+  static setFilterType(target: unknown, filterType: BaseObjectConstructor) {
     this.setMetadata(target, { filterType });
   }
 
   static isFilterableField(metadata: CommonPropertyMetadata): boolean {
     const { innerType } = getTypeInfo(metadata.type);
-    return Boolean(innerType && FilterTypesRegistry.hasMetadata(innerType as Constructor));
+    return Boolean(innerType && FilterTypesRegistry.hasMetadata(innerType));
   }
 }
 
-export function FiltersType(target: Constructor): ClassDecorator {
+export function FiltersType(target: unknown): ClassDecorator {
   return function (filterType) {
     FilterTypesRegistry.setFilterType(target, filterType as unknown as BaseObjectConstructor);
   }

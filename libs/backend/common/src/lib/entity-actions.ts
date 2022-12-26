@@ -1,6 +1,6 @@
-import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, ClassMetadataManager, Email, entity, extendsBuiltInField, getTypeInfo, Id, innerTypeExtends, isBuiltInField, isPrimaryKeyField, or, PropertyMetadata, withPropertiesMetadata } from "@garrettmk/class-schema";
+import { BaseModel, BaseModelConstructor, ClassContext, ClassMetadata, ClassMetadataManager, entity, extendsBuiltInField, getTypeInfo, Id, isEnumField, isPrimaryKeyField, PropertyMetadata, TypeFn, withPropertiesMetadata } from "@garrettmk/class-schema";
 import { always, applyToProperties, ifMetadata, matchesMetadata, MetadataActionSet, option, transformContext } from "@garrettmk/metadata-actions";
-import { Constructor, doesExtend, MaybeArray } from "@garrettmk/ts-utils";
+import { Constructor, doesExtend, isConstructor, MaybeArray } from "@garrettmk/ts-utils";
 import { EntitySchema } from "@mikro-orm/core";
 import cuid from "cuid";
 import { EntitySchemaRegistry } from "./entity-registry";
@@ -45,6 +45,23 @@ export const EntityActions = new MetadataActionSet<ClassMetadata, Constructor>(C
                                         : undefined
                                 }
                             });
+                        }),
+
+                        option(isEnumField, (meta, ctx) => {
+                            const { innerType, isArray } = getTypeInfo(meta.type as TypeFn);
+
+                            Object.assign(ctx.entity.properties, {
+                                [ctx.propertyKey]: {
+                                    enum: true,
+                                    items: () => innerType,
+                                    array: isArray,
+                                    nullable: meta.optional,
+                                    // @ts-expect-error only on scalar fields
+                                    unique: meta.unique,
+                                    comment: meta.description,
+                                    onCreate: meta.default
+                                }
+                            })
                         }),
 
                         option(isEntityField, (meta, ctx) => {
@@ -104,7 +121,7 @@ function toEntityBuilderContext(metadata: ClassMetadata, context: ClassContext):
 function isEntityField<T extends BaseModelConstructor>(meta: PropertyMetadata): meta is PropertyMetadata<MaybeArray<T>> {
     const { innerType } = getTypeInfo(meta.type);
 
-    return doesExtend(innerType, BaseModel);
+    return isConstructor(innerType) && doesExtend(innerType, BaseModel);
 }
 
 function registerEntitySchema(metadata: ClassMetadata, context: EntityBuilderContext) {

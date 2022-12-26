@@ -19,6 +19,7 @@ import {
 import { Constructor } from '@garrettmk/ts-utils';
 import {
   CreateInput,
+  EnumFilterInput,
   FiltersType,
   ObjectFilter,
   Paginated,
@@ -34,6 +35,11 @@ import { IsEmail } from 'class-validator';
 import { decorateProperties } from '@nest-mikro-tenants/core/common';
 
 
+export enum UserStatus {
+  Enabled = 'ENABLED',
+  Disabled = 'DISABLED'
+}
+
 @Class({ output, entity, description: 'An application user' })
 export class User extends BaseModel {
   @Property(() => String, { optional, minLength: 2, description: "The user's human name" })
@@ -47,6 +53,9 @@ export class User extends BaseModel {
   
   @Property(() => String, { hidden, description: "The user's password" })
   password!: string;
+
+  @Property(() => UserStatus, { default: () => UserStatus.Enabled, description: "The user's status" })
+  status!: UserStatus;
   
   @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was created' })
   createdAt!: Date;
@@ -92,6 +101,10 @@ export class UserUpdateInput extends UpdateInput(User, {
   @Property(() => String, { optional })
   password?: string;
 }
+
+@FiltersType(UserStatus)
+@Class({ input })
+export class UserStatusFilter extends EnumFilterInput(UserStatus, 'UserStatus') {};
 
 @FiltersType(User)
 @Class({ input })
