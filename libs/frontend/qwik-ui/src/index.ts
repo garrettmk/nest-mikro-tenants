@@ -1,1 +1,1 @@
-export * from './lib/qwik-ui';
+export * from './lib/components/panel';

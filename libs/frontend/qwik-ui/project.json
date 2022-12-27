@@ -4,18 +4,6 @@
     "sourceRoot": "libs/frontend/qwik-ui/src",
     "projectType": "library",
     "targets": {
-        "build": {
-            "executor": "@nrwl/vite:build",
-            "outputs": ["{options.outputPath}"],
-            "defaultConfiguration": "production",
-            "options": {
-                "outputPath": "dist/libs/frontend/qwik-ui"
-            },
-            "configurations": {
-                "development": {},
-                "production": {}
-            }
-        },
         "test": {
             "executor": "@nrwl/vite:test",
             "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

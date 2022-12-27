@@ -8,6 +8,7 @@ import { PageTitle } from '../components/header/page-title';
 import { MenuItem } from '../components/menu/menu-item';
 import { Modal } from '../components/modals/modal';
 import { NotificationsContext } from '../components/notifications/notifications-provider';
+import { Panel } from '@nest-mikro-tenants/frontend/qwik-ui';
 
 export default component$(() => {
     const { notify$, dismiss$ } = useContext(NotificationsContext);
@@ -20,6 +21,7 @@ export default component$(() => {
                 </PageTitle>
             </PageHeader>
             <section>
+                <Panel/>
 
                 <MenuButton class="mb-6" size='sm'>
                     <MenuItem href="/users">One</MenuItem>
