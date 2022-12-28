@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "@builder.io/qwik";
 import clsx from "clsx";
-import { FormTextInput } from "./form-inputs/form-text-input";
+import { FormTextInput } from "@nest-mikro-tenants/frontend/qwik-ui";
 
 export type UserCreateFormProps = HTMLAttributes<HTMLFormElement>;
 

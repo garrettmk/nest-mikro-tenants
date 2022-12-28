@@ -5,9 +5,7 @@ import { deleteOneMutation } from "@nest-mikro-tenants/frontend/common";
 import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
 import { PencilIcon, TrashIcon } from "heroicons-qwik/24/solid";
 import { useToggle } from "../../hooks/use-toggle.hook";
-import { MenuButton } from "../buttons/menu-button";
-import { MenuItem } from "../menu/menu-item";
-import { ConfirmDeleteModal } from "../modals/confirm-delete-modal";
+import { MenuButton, MenuItem, ConfirmDeleteModal } from "@nest-mikro-tenants/frontend/qwik-ui";
 
 export interface UserActionsMenuProps {
     user: Serializable<User>

@@ -1,12 +1,11 @@
-import { $, component$, Resource, useWatch$ } from "@builder.io/qwik";
+import { $, component$, useWatch$ } from "@builder.io/qwik";
 import { DocumentHead } from "@builder.io/qwik-city";
 import { User, UsersWhereInput } from "@nest-mikro-tenants/core/domain";
 import { findManyQuery } from "@nest-mikro-tenants/frontend/common";
+import { CreateButton, Toolbar } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { useLiveQuery } from "@nest-mikro-tenants/frontend/qwurql";
-import { CreateButton } from "../../components/buttons/create-button";
 import { PageHeader } from "../../components/header/page-header";
 import { PageTitle } from "../../components/header/page-title";
-import { Toolbar } from "../../components/toolbar/toolbar";
 import { UsersTable } from "../../components/users/users-table";
 
 export const findManyUsersQuery$ = $(() => findManyQuery(User, UsersWhereInput));

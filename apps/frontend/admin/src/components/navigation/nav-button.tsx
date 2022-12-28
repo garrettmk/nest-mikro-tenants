@@ -5,10 +5,11 @@ import clsx from 'clsx';
 export interface NavButtonProps {
     href: string
     exact?: boolean
+    level?: 1 | 2
 }
 
 export const NavButton = component$((props: NavButtonProps) => {
-    const { href, exact } = props;
+    const { href, exact, level = 1 } = props;
     const location = useLocation();
     
     const active = exact 
@@ -24,7 +25,9 @@ export const NavButton = component$((props: NavButtonProps) => {
         ['hover:bg-slate-800']: !active
     });
 
-    const textStyles = clsx('text-lg', {
+    const textStyles = clsx({
+        'text-lg': level === 1,
+        'text-md': level === 2,
         'font-bold': active
     });
 

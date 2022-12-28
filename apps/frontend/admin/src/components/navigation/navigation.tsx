@@ -1,6 +1,6 @@
 import { component$ } from "@builder.io/qwik";
 import clsx from 'clsx';
-import { ChartPieIcon, HomeIcon, UserIcon } from 'heroicons-qwik/24/outline';
+import { ChartPieIcon, HomeIcon, UserIcon, Cog6ToothIcon } from 'heroicons-qwik/24/outline';
 import { NavButton } from "./nav-button";
 
 export interface NavigationProps {
@@ -26,6 +26,26 @@ export const Navigation = component$((props: NavigationProps) => {
             <NavButton href='/tenants'>
                 <HomeIcon q:slot='icon'/>
                 Tenants
+            </NavButton>
+            <NavButton href='/components'>
+                <Cog6ToothIcon q:slot='icon'/>
+                Components
+            </NavButton>
+            <NavButton href='/components/layout' level={2}>
+                <span q:slot='icon'/>
+                Layout
+            </NavButton>
+            <NavButton href='/components/buttons' level={2}>
+                <span q:slot='icon'/>
+                Buttons
+            </NavButton>
+            <NavButton href='/components/menus' level={2}>
+                <span q:slot='icon'/>
+                Menus
+            </NavButton>
+            <NavButton href='/components/inputs' level={2}>
+                <span q:slot='icon'/>
+                Inputs
             </NavButton>
         </nav>
     );

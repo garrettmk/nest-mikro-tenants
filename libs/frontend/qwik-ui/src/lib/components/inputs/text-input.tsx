@@ -1,34 +1,33 @@
-import { PropFunction, QwikChangeEvent } from "@builder.io/qwik"
-import clsx from "clsx"
+import { HTMLAttributes } from "@builder.io/qwik"
 
-export interface TextInputProps {
+export interface TextInputProps extends HTMLAttributes<HTMLInputElement> {
     class?: string
     label?: string
     name?: string
+    value?: string
     password?: boolean
     required?: boolean
-    value?: string
-    onChange$?: PropFunction<(event: QwikChangeEvent<HTMLInputElement>) => unknown>
     errors?: string[]
 }
 
 export const TextInput = (props: TextInputProps) => {
+    const { class: classNames, label, name, errors, password, ...inputProps } = props;
+
     return (
-        <div class={clsx(props.class)}>
+        <div class={classNames}>
             <label 
                 class="block text-sm text-gray-600 mb-1"
-                for={props.name}
+                for={name}
             >
-                {props.label}
+                {label}
             </label>
             <input 
                 class="block w-full rounded-sm p-1 focus:ring-2 ring-blue-300 outline-none" 
-                type={props.password ? "password" : "text"}
-                name={props.name}
-                value={props.value}
-                onChange$={props.onChange$}
+                type={password ? "password" : "text"}
+                name={name}
+                {...inputProps}
             />
-            {props.errors?.map(error => (
+            {errors?.map(error => (
                 <label class="block text-xs text-red-500 mt-1">
                     {error}
                 </label>

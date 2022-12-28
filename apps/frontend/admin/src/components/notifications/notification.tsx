@@ -1,5 +1,5 @@
 import { component$, useContext, useMount$ } from "@builder.io/qwik";
-import { CloseButton } from "../buttons/close-button";
+import { CloseButton } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { Notification, NotificationsContext } from "./notifications-provider";
 
 export const NotificationComponent = component$((props: Notification) => {
