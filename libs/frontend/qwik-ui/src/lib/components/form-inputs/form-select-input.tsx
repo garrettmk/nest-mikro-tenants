@@ -1,14 +1,17 @@
 import { $, component$, QwikChangeEvent, useContext } from "@builder.io/qwik";
+import { capitalize } from "radash";
 import { FormStateContext } from "../../contexts/form-state.context";
 import { SelectInput, SelectInputProps } from "../inputs/select-input";
 
-export type FormSelectInputProps = Omit<SelectInputProps, 'value' | 'errors' | 'onChange$'>;
+export type FormSelectInputProps = Omit<SelectInputProps, 'value' | 'errors' | 'onChange$'> & {
+    options?: (string | { value: string, label: string})[]
+};
 
 export const FormSelectInput = component$((props: FormSelectInputProps) => {
-    const { name } = props;
+    const { name, options = [] } = props;
     const state = useContext(FormStateContext);
     
-    const value = name 
+    const formValue = name 
         ? state.formData[name] as string
         : undefined;
 
@@ -25,10 +28,22 @@ export const FormSelectInput = component$((props: FormSelectInputProps) => {
         <SelectInput
             {...props}
             name={name}
-            value={value}
             errors={errors}
             onChange$={handleChange$}
-        />
+        >
+            {options.map(option => typeof option === 'string' 
+                    ? { value: option, label: capitalize(option) }
+                    : option
+            ).map(({ value, label }) => (
+                <option
+                    key={value}
+                    value={value}
+                    selected={value === formValue}
+                >
+                    {label}
+                </option>
+            ))}
+        </SelectInput>
     );
 });
 

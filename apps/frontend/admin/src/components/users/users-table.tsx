@@ -33,6 +33,10 @@ export const UsersTable = component$((props: UsersTableProps) => {
             dataKey: 'email'
         },
         {
+            label: 'Status',
+            dataKey: 'status',
+        },
+        {
             label: 'Date Created',
             dataKey: 'createdAt',
             format: $(toLocaleDateString)

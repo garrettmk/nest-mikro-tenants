@@ -1,6 +1,7 @@
 import { HTMLAttributes } from "@builder.io/qwik";
 import clsx from "clsx";
-import { FormTextInput } from "@nest-mikro-tenants/frontend/qwik-ui";
+import { FormSelectInput, FormTextInput } from "@nest-mikro-tenants/frontend/qwik-ui";
+import { UserStatus } from "@nest-mikro-tenants/core/domain";
 
 export type UserCreateFormProps = HTMLAttributes<HTMLFormElement>;
 
@@ -35,7 +36,12 @@ export const UserCreateForm = (props: UserCreateFormProps) => {
                 label="Password"
                 password
             />
-            <div class="basis-1/2"/>
+            <FormSelectInput
+                class="basis-1/2 pr-4"
+                name="status"
+                label="Status"
+                options={Object.values(UserStatus)}
+            />
             <FormTextInput
                 class="basis-1/2"
                 name="passwordAgain"

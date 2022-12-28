@@ -4,7 +4,6 @@ export interface SelectInputProps extends HTMLAttributes<HTMLSelectElement> {
     label?: string
     name?: string
     errors?: string[]
-    value?: string
 }
 
 export const SelectInput = (props: SelectInputProps) => {

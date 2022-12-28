@@ -36,8 +36,8 @@ import { decorateProperties } from '@nest-mikro-tenants/core/common';
 
 
 export enum UserStatus {
-  Enabled = 'ENABLED',
-  Disabled = 'DISABLED'
+  ENABLED = 'ENABLED',
+  DISABLED = 'DISABLED'
 }
 
 @Class({ output, entity, description: 'An application user' })
@@ -54,7 +54,7 @@ export class User extends BaseModel {
   @Property(() => String, { hidden, description: "The user's password" })
   password!: string;
 
-  @Property(() => UserStatus, { default: () => UserStatus.Enabled, description: "The user's status" })
+  @Property(() => UserStatus, { default: () => UserStatus.ENABLED, description: "The user's status" })
   status!: UserStatus;
   
   @Property(() => Date, { default: () => new Date(), description: 'The datetime this user was created' })
