@@ -6,7 +6,7 @@ import { CreateButton, Toolbar } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { useLiveQuery } from "@nest-mikro-tenants/frontend/qwurql";
 import { PageHeader } from "../../components/header/page-header";
 import { PageTitle } from "../../components/header/page-title";
-import { UsersTable } from "../../components/users/users-table";
+import { UsersTable } from "./users-table";
 
 export const findManyUsersQuery$ = $(() => findManyQuery(User, UsersWhereInput));
 

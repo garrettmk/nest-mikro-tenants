@@ -1,9 +1,7 @@
 import { $, noSerialize, useSignal } from "@builder.io/qwik";
-import { Serializable } from "@nest-mikro-tenants/core/common";
-import { OperationResult } from "@urql/core";
 import { pipe, subscribe } from 'wonka';
 import { OperationDocumentQrl } from "../../types";
-import { UseLiveOperationOptions, UseLiveOperationResult } from "./use-live-operation.types";
+import { SimplifiedOperationResult, UseLiveOperationOptions, UseLiveOperationResult } from "./use-live-operation.types";
 import { createFetchContext, executeOperation, getVariables, handleResult, isResolvedState, unsubscribeLast, useLiveOperationState } from "./use-live-operation.utils";
 
 /**
@@ -30,7 +28,7 @@ export function useLiveOperation<Data, Variables extends object>(
         : optionsOrQrl;
 
     const state = useLiveOperationState(options);
-    const result = useSignal<Serializable<OperationResult<Data, Variables>>>();
+    const result = useSignal<SimplifiedOperationResult<Data, Variables>>();
     const loading = useSignal(false);
 
     // Create the operation executor

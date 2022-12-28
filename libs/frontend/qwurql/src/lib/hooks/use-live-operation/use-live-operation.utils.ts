@@ -1,10 +1,9 @@
 import { noSerialize, Signal, useContext, useStore, useWatch$ } from "@builder.io/qwik";
-import { Serializable } from "@nest-mikro-tenants/core/common";
 import { OperationContext, OperationResult } from "@urql/core";
+import { omit } from "radash";
 import { UrqlContext } from "../../contexts/urql.context";
 import { getOperationType } from "../../utils/get-operation-type.util";
-import { toJSON } from "../../utils/to-json.util";
-import type { ResolvedUseLiveOperationState, UseLiveOperationState } from "./use-live-operation.types";
+import type { ResolvedUseLiveOperationState, SimplifiedOperationResult, UseLiveOperationState } from "./use-live-operation.types";
 import { UseLiveOperationOptions } from "./use-live-operation.types";
 
 /** Resolve the client, operation document, operation type, and store other options in state */
@@ -72,7 +71,7 @@ export async function executeOperation<D, V extends object>(state: ResolvedUseLi
 }
 
 /** Handle results  */
-export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, result: OperationResult<D, V>): Promise<Serializable<OperationResult<D, V>>> {
+export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, result: OperationResult<D, V>): Promise<SimplifiedOperationResult<D, V>> {
     const { onResult$, onError$, onData$ } = state;
 
     await onResult$?.(result);
@@ -82,5 +81,5 @@ export async function handleResult<D, V extends object>(state: ResolvedUseLiveOp
     else
         await onData$?.(result.data);
 
-    return toJSON(result);
+    return omit(result, ['operation']);
 }
