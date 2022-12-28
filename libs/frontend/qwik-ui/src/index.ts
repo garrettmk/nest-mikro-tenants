@@ -24,6 +24,8 @@ export * from './lib/components/menu/menu-button';
 export * from './lib/components/modals/modal';
 export * from './lib/components/modals/confirm-delete-modal';
 
+export * from './lib/components/table/table';
+
 export * from './lib/components/toolbar/toolbar';
 
 export * from './lib/components/tooltip/tooltip';

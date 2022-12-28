@@ -1,7 +1,7 @@
 import { $, component$ } from "@builder.io/qwik";
 import { Serializable } from "@nest-mikro-tenants/core/common";
 import { User } from "@nest-mikro-tenants/core/domain";
-import { Table, TableColumn, TableProps } from "../table/table";
+import { Table, TableColumn, TableProps } from '@nest-mikro-tenants/frontend/qwik-ui';
 import { UserActionsMenu } from "./user-actions-menu";
 
 export function toLocaleDateString(value: unknown): string {

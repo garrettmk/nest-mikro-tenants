@@ -5,7 +5,7 @@ import { User, UserCreateInput } from "@nest-mikro-tenants/core/domain";
 import { createOneMutation, UserCreateFormData } from "@nest-mikro-tenants/frontend/common";
 import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
 import { Toolbar, Breadcrumbs, CancelButton, SaveButton, CardHeader, CardSection, CardTitle } from '@nest-mikro-tenants/frontend/qwik-ui';
-import { UserCreateForm } from "../../../components/forms/user-create-form";
+import { UserCreateForm } from "../../../components/users/user-create-form";
 import { PageHeader } from "../../../components/header/page-header";
 import { PageTitle } from "../../../components/header/page-title";
 import { FormStateContext } from "../../../contexts/form-state.context";
