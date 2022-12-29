@@ -1,17 +1,55 @@
-import { and, ClassContext, ClassMetadata, ClassMetadataManager, decorateClassWith, decoratePropertyWith, Email, Float, getTypeInfo, hidden, Id, input, Int, not, or, output, PropertyMetadata, TypeFn, withPropertiesMetadata } from "@garrettmk/class-schema";
-import { always, applyToProperties, breakAction, ifMetadata, matchesMetadata, MetadataActionSetClass, MetadataSelector, option } from "@garrettmk/metadata-actions";
+import {
+    and,
+    ClassContext,
+    ClassMetadata,
+    ClassMetadataManager,
+    decorateClassWith,
+    decoratePropertyWith,
+    Email,
+    Float,
+    getTypeInfo,
+    hidden,
+    Id,
+    input,
+    Int,
+    not,
+    or,
+    output,
+    PropertyMetadata,
+    TypeFn,
+    withPropertiesMetadata,
+} from '@garrettmk/class-schema';
+import {
+    always,
+    applyToProperties,
+    breakAction,
+    ifMetadata,
+    matchesMetadata,
+    MetadataActionSetClass,
+    MetadataSelector,
+    option,
+} from '@garrettmk/metadata-actions';
 import { Constructor, isConstructor } from '@garrettmk/ts-utils';
-import { TenantStatus, UserStatus } from "@nest-mikro-tenants/core/domain";
-import { Field, Float as GqlFloat, ID as GqlId, InputType as GqlInputType, Int as GqlInt, ObjectType as GqlObjectType, registerEnumType, ReturnTypeFunc, ReturnTypeFuncValue } from '@nestjs/graphql';
+import { TenantStatus, UserStatus } from '@nest-mikro-tenants/core/domain';
+import {
+    Field,
+    Float as GqlFloat,
+    ID as GqlId,
+    InputType as GqlInputType,
+    Int as GqlInt,
+    ObjectType as GqlObjectType,
+    registerEnumType,
+    ReturnTypeFunc,
+    ReturnTypeFuncValue,
+} from '@nestjs/graphql';
 
 registerEnumType(UserStatus, {
     name: 'UserStatus',
 });
 
 registerEnumType(TenantStatus, {
-    name: 'TenantStatus'
+    name: 'TenantStatus',
 });
-
 
 export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constructor>() {
     static manager = ClassMetadataManager;
@@ -22,7 +60,7 @@ export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constr
         [Int, GqlInt],
         [Float, GqlFloat],
         [RegExp, String],
-        [Email, String]
+        [Email, String],
     ]);
 
     /** MetadataTypeGuard, selects metadata whose innerType is a mapped type */
@@ -36,12 +74,9 @@ export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constr
         const { innerType, isArray } = getTypeInfo(type);
         const mappedType = GraphQLActions.mappedTypes.get(innerType);
 
-        if (!mappedType)
-            throw new Error(`No GraphQL type mapping for ${innerType}`);
+        if (!mappedType) throw new Error(`No GraphQL type mapping for ${innerType}`);
 
-        return isArray
-            ? () => [mappedType]
-            : () => mappedType;
+        return isArray ? () => [mappedType] : () => mappedType;
     }
 
     /** Actions */
@@ -49,57 +84,54 @@ export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constr
         /** Process targets that are marked as inputs or outputs, and are not hidden */
         ifMetadata(
             and(
-                or(
-                    matchesMetadata({ input }),
-                    matchesMetadata({ output })
-                ),
-                not(
-                    matchesMetadata({ hidden })
-                )
+                or(matchesMetadata({ input }), matchesMetadata({ output })),
+                not(matchesMetadata({ hidden }))
             ) as MetadataSelector<ClassMetadata, ClassContext>,
             [
                 withPropertiesMetadata([
                     applyToProperties([
                         /** Ignore hidden fields */
-                        option(matchesMetadata({ hidden }), [
-                            breakAction
-                        ]),
-                        
+                        option(matchesMetadata({ hidden }), [breakAction]),
+
                         /** If the field's type has a mapping, substitute the mapped type */
                         option(this.isMappedTypeField, [
-                            decoratePropertyWith(meta => 
+                            decoratePropertyWith((meta) =>
                                 Field(this.toGraphQlType(meta.type), {
                                     nullable: meta.optional,
-                                    description: meta.description
+                                    description: meta.description,
                                 })
-                            )
+                            ),
                         ]),
-    
+
                         /** For every other type, just use it as-is */
                         option(always, [
-                            decoratePropertyWith(meta => 
+                            decoratePropertyWith((meta) =>
                                 Field(meta.type as ReturnTypeFunc, {
                                     nullable: meta.optional,
-                                    description: meta.description
+                                    description: meta.description,
                                 })
-                            )
-                        ])
-                    ])
+                            ),
+                        ]),
+                    ]),
                 ]),
-    
+
                 /** Tell the GraphQL system what type of object this is */
                 ifMetadata(
                     matchesMetadata({ output }),
-                    decorateClassWith(meta => GqlObjectType({
-                        description: meta.description,
-                        isAbstract: meta.abstract
-                    })),
-                    decorateClassWith(meta => GqlInputType({
-                        description: meta.description,
-                        isAbstract: meta.abstract
-                    }))
+                    decorateClassWith((meta) =>
+                        GqlObjectType({
+                            description: meta.description,
+                            isAbstract: meta.abstract,
+                        })
+                    ),
+                    decorateClassWith((meta) =>
+                        GqlInputType({
+                            description: meta.description,
+                            isAbstract: meta.abstract,
+                        })
+                    )
                 ),
             ]
-        )
+        ),
     ];
 }

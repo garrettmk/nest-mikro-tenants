@@ -1,3 +1,3 @@
-import { GraphQLActions } from '@nest-mikro-tenants/backend/common';
+import { GraphQLActions } from '@nest-mikro-tenants/backend/actions';
 
 GraphQLActions.applyActions();
