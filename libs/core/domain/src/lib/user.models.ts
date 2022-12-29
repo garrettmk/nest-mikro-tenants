@@ -15,7 +15,6 @@ import {
   output,
   Property,
   unique,
-  IBaseModel
 } from '@garrettmk/class-schema';
 import { Constructor } from '@garrettmk/ts-utils';
 import {
@@ -36,25 +35,13 @@ import { IsEmail } from 'class-validator';
 import { decorateProperties } from '@nest-mikro-tenants/core/common';
 
 
-/** We can't use classes everywhere, so describe the interface here */
-export interface IUser extends IBaseModel {
-  nickname?: string
-  username: string
-  email: string
-  password: string
-  status: UserStatus
-  createdAt: Date
-  updatedAt: Date
-}
-
-
 export enum UserStatus {
   ENABLED = 'ENABLED',
   DISABLED = 'DISABLED'
 }
 
 @Class({ output, entity, description: 'An application user' })
-export class User extends BaseModel implements IUser {
+export class User extends BaseModel {
   @Property(() => String, { optional, minLength: 2, description: "The user's human name" })
   nickname?: string;
 

@@ -1,9 +1,0 @@
-export enum ErrorCode {
-  UNAUTHENTICATED = 'UNAUTHENTICATED',
-  BAD_USER_INPUT = 'BAD_USER_INPUT',
-  NOT_FOUND = 'NOT_FOUND',
-}
-
-export enum DatabaseSchema {
-  USERS_AND_TENANTS = 'USERS_AND_TENANTS',
-}

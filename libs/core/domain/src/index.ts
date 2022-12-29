@@ -1,4 +1,4 @@
-import { BaseObjectActions, Id, ValidationActions } from '@garrettmk/class-schema';
+import { Id } from '@garrettmk/class-schema';
 import { FactoryActions } from '@nest-mikro-tenants/core/factories';
 import cuid, { isCuid } from 'cuid';
 
@@ -14,8 +14,7 @@ import './lib/tenant.models';
 import './lib/user.models';
 
 FactoryActions.applyActions();
-ValidationActions.applyActions();
-BaseObjectActions.applyActions();
 
 export * from './lib/tenant.models';
 export * from './lib/user.models';
+
