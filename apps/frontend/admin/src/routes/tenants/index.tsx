@@ -8,7 +8,7 @@ import { PageHeader } from "../../components/header/page-header";
 import { PageTitle } from "../../components/header/page-title";
 import { TenantsTable } from "./tenants-table";
 
-export const findManyTenantsQuery$ = $(() => findManyQuery(Tenant, TenantsWhereInput, 'Tenant'));
+export const findManyTenantsQuery$ = $(() => findManyQuery(Tenant, TenantsWhereInput));
 
 export default component$(() => {
     const findTenants = useLiveQuery({

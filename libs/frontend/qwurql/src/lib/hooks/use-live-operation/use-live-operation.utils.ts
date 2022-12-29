@@ -3,6 +3,7 @@ import { OperationContext, OperationResult } from "@urql/core";
 import { omit } from "radash";
 import { UrqlContext } from "../../contexts/urql.context";
 import { getOperationType } from "../../utils/get-operation-type.util";
+import { toJSON } from "../../utils/to-json.util";
 import type { ResolvedUseLiveOperationState, SimplifiedOperationResult, UseLiveOperationState } from "./use-live-operation.types";
 import { UseLiveOperationOptions } from "./use-live-operation.types";
 
@@ -71,7 +72,7 @@ export async function executeOperation<D, V extends object>(state: ResolvedUseLi
 }
 
 /** Handle results  */
-export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, result: OperationResult<D, V>): Promise<SimplifiedOperationResult<D, V>> {
+export async function handleResult<D, V extends object>(state: ResolvedUseLiveOperationState<D, V>, result: OperationResult<D, V>): Promise<SimplifiedOperationResult<D>> {
     const { onResult$, onError$, onData$ } = state;
 
     await onResult$?.(result);
@@ -81,5 +82,24 @@ export async function handleResult<D, V extends object>(state: ResolvedUseLiveOp
     else
         await onData$?.(result.data);
 
-    return omit(result, ['operation']);
+    return simplifyOperationResult(result);
+}
+
+/**  */
+export function simplifyOperationResult<D>(result: OperationResult<D>): SimplifiedOperationResult<D> {
+    const { data, extensions, stale, hasNext, error } = result;
+
+    return {
+        data,
+        extensions,
+        stale,
+        hasNext,
+        error: error ? {
+            name: error.name,
+            message: error.message,
+            graphQLErrors: error.graphQLErrors.map(e => e.toJSON()),
+            networkError: toJSON(error.networkError),
+            response: toJSON(error.response),
+        } : error,
+    }
 }

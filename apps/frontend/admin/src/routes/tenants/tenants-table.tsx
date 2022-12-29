@@ -37,7 +37,7 @@ export const TenantsTable = component$((props: TenantsTableProps) => {
         {
             label: 'Actions',
             classes: 'flex justify-center',
-            format: $((user) => <TenantActionsMenu user={user as Serializable<Tenant>}/>)
+            format: $((tenant) => <TenantActionsMenu tenant={tenant as Serializable<Tenant>}/>)
         }
     ];
     

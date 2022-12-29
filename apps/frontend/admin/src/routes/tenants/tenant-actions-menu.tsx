@@ -8,17 +8,17 @@ import { useToggle } from "../../hooks/use-toggle.hook";
 import { MenuButton, MenuItem, ConfirmDeleteModal } from "@nest-mikro-tenants/frontend/qwik-ui";
 
 export interface TenantActionsMenuProps {
-    user: Serializable<Tenant>
+    tenant: Serializable<Tenant>
 }
 
 export const deleteTenantMutation$ = $(() => deleteOneMutation(Tenant, TenantsWhereOneInput));
 
 export const TenantActionsMenu = component$((props: TenantActionsMenuProps) => {
-    const { user } = props;
+    const { tenant } = props;
     const isConfirmModalOpen = useToggle();
     const deleteTenant = useMutation({
         operation$: deleteTenantMutation$,
-        variables: { where: { id: { eq: user.id } } },
+        variables: { where: { id: { eq: tenant.id } } },
         onExecute$: isConfirmModalOpen.off$,
         context: { additionalTypenames: ['Tenant'] }
     });
@@ -26,7 +26,7 @@ export const TenantActionsMenu = component$((props: TenantActionsMenuProps) => {
     return (
         <>
             <MenuButton class="bg-transparent border-none" size='md' fit>
-                <MenuItem href={`/users/${user.id}`}>
+                <MenuItem href={`/tenants/${tenant.id}`}>
                     <PencilIcon class="inline-block w-4 h-4 mr-4 text-gray-600"/>
                     Edit Tenant
                 </MenuItem>

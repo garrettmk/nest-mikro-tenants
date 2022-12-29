@@ -1,14 +1,13 @@
 import { $, component$ } from "@builder.io/qwik";
-import { Serializable } from "@nest-mikro-tenants/core/common";
 import { User, UsersWhereOneInput } from "@nest-mikro-tenants/core/domain";
 import { deleteOneMutation } from "@nest-mikro-tenants/frontend/common";
+import { ConfirmDeleteModal, MenuButton, MenuItem } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { useMutation } from "@nest-mikro-tenants/frontend/qwurql";
 import { PencilIcon, TrashIcon } from "heroicons-qwik/24/solid";
 import { useToggle } from "../../hooks/use-toggle.hook";
-import { MenuButton, MenuItem, ConfirmDeleteModal } from "@nest-mikro-tenants/frontend/qwik-ui";
 
 export interface UserActionsMenuProps {
-    user: Serializable<User>
+    user: User
 }
 
 export const deleteUserMutation$ = $(() => deleteOneMutation(User, UsersWhereOneInput));

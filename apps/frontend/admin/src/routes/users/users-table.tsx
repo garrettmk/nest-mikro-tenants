@@ -6,7 +6,7 @@ import { UserActionsMenu } from "./user-actions-menu";
 
 
 export interface UsersTableProps extends Omit<TableProps, 'items' | 'columns'> {
-    items?: Serializable<User>[]
+    items?: User[]
 }
 
 export const UsersTable = component$((props: UsersTableProps) => {

@@ -1,6 +1,6 @@
-import { Email, and, ClassContext, ClassMetadata, ClassMetadataManager, decorateClassWith, decoratePropertyWith, Float, getTypeInfo, hidden, Id, input, Int, not, or, output, PropertyMetadata, TypeFn, withPropertiesMetadata, isEnumField } from "@garrettmk/class-schema";
-import { always, applyToProperties, breakAction, ifMetadata, matchesMetadata, MetadataActionSet, MetadataSelector, MetadataTypeGuard, option, PropertyContext } from "@garrettmk/metadata-actions";
-import { Constructor } from '@garrettmk/ts-utils';
+import { and, ClassContext, ClassMetadata, ClassMetadataManager, decorateClassWith, decoratePropertyWith, Email, Float, getTypeInfo, hidden, Id, input, Int, not, or, output, PropertyMetadata, TypeFn, withPropertiesMetadata } from "@garrettmk/class-schema";
+import { always, applyToProperties, breakAction, ifMetadata, matchesMetadata, MetadataActionSetClass, MetadataSelector, option } from "@garrettmk/metadata-actions";
+import { Constructor, isConstructor } from '@garrettmk/ts-utils';
 import { TenantStatus, UserStatus } from "@nest-mikro-tenants/core/domain";
 import { Field, Float as GqlFloat, ID as GqlId, InputType as GqlInputType, Int as GqlInt, ObjectType as GqlObjectType, registerEnumType, ReturnTypeFunc, ReturnTypeFuncValue } from '@nestjs/graphql';
 
@@ -12,94 +12,94 @@ registerEnumType(TenantStatus, {
     name: 'TenantStatus'
 });
 
-/**
- * Map our types to GraphQL types
- */
-const gqlTypeMap = new Map<Constructor, ReturnTypeFuncValue>([
-    [Id, GqlId],
-    [Int, GqlInt],
-    [Float, GqlFloat],
-    [RegExp, String],
-    [Email, String]
-]);
 
-/**
- * Selector for fields that need to use a mapped type.
- */
-const isMappedType: MetadataTypeGuard<PropertyMetadata, PropertyMetadata<Constructor>, ClassContext & PropertyContext> = ((meta, context) => {
-    const { innerType } = getTypeInfo(meta.type);
-    return gqlTypeMap.has(innerType as Constructor);
-}) as MetadataTypeGuard<PropertyMetadata, PropertyMetadata<Constructor>>
+export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constructor>() {
+    static manager = ClassMetadataManager;
 
-/**
- * 
- * @param type A `TypeFn` to use as a template
- * @returns A `TypeFn` for a mapped GraphQL type
- */
-const toGraphQlType = (type: TypeFn<Constructor>) => {
-    const { innerType, isArray } = getTypeInfo(type);
-    const gqlType = gqlTypeMap.get(innerType);
+    /** Mapped types */
+    static mappedTypes = new Map<Constructor, ReturnTypeFuncValue>([
+        [Id, GqlId],
+        [Int, GqlInt],
+        [Float, GqlFloat],
+        [RegExp, String],
+        [Email, String]
+    ]);
 
-    if (!gqlType)
-        throw new Error(`No GraphQL type mapping for ${innerType}`);
+    /** MetadataTypeGuard, selects metadata whose innerType is a mapped type */
+    static isMappedTypeField(meta: PropertyMetadata): meta is PropertyMetadata<Constructor> {
+        const { innerType } = getTypeInfo(meta.type);
+        return isConstructor(innerType) && GraphQLActions.mappedTypes.has(innerType);
+    }
 
-    return isArray
-        ? () => [gqlType]
-        : () => gqlType;
-}
+    /** Convert a TypeFn to use a mapped type */
+    static toGraphQlType(type: TypeFn<Constructor>): TypeFn<ReturnTypeFuncValue> {
+        const { innerType, isArray } = getTypeInfo(type);
+        const mappedType = GraphQLActions.mappedTypes.get(innerType);
 
-/**
- * A
- */
-export const GraphQLActions = new MetadataActionSet<ClassMetadata, Constructor>(ClassMetadataManager, [
-    ifMetadata(
-        and(
-            or(
-                matchesMetadata({ input }),
-                matchesMetadata({ output })
-            ),
-            not(
-                matchesMetadata({ hidden })
-            )
-        ) as MetadataSelector<ClassMetadata, ClassContext>,
-        [
-            withPropertiesMetadata([
-                applyToProperties([
-                    option(matchesMetadata({ hidden }), [
-                        breakAction
-                    ]),
-                    
-                    option(isMappedType, [
-                        decoratePropertyWith(meta => 
-                            Field(toGraphQlType(meta.type), {
-                                nullable: meta.optional,
-                                description: meta.description
-                            })
-                        )
-                    ]),
+        if (!mappedType)
+            throw new Error(`No GraphQL type mapping for ${innerType}`);
 
-                    option(always, [
-                        decoratePropertyWith(meta => 
-                            Field(meta.type as ReturnTypeFunc, {
-                                nullable: meta.optional,
-                                description: meta.description
-                            })
-                        )
+        return isArray
+            ? () => [mappedType]
+            : () => mappedType;
+    }
+
+    /** Actions */
+    static actions = [
+        /** Process targets that are marked as inputs or outputs, and are not hidden */
+        ifMetadata(
+            and(
+                or(
+                    matchesMetadata({ input }),
+                    matchesMetadata({ output })
+                ),
+                not(
+                    matchesMetadata({ hidden })
+                )
+            ) as MetadataSelector<ClassMetadata, ClassContext>,
+            [
+                withPropertiesMetadata([
+                    applyToProperties([
+                        /** Ignore hidden fields */
+                        option(matchesMetadata({ hidden }), [
+                            breakAction
+                        ]),
+                        
+                        /** If the field's type has a mapping, substitute the mapped type */
+                        option(this.isMappedTypeField, [
+                            decoratePropertyWith(meta => 
+                                Field(this.toGraphQlType(meta.type), {
+                                    nullable: meta.optional,
+                                    description: meta.description
+                                })
+                            )
+                        ]),
+    
+                        /** For every other type, just use it as-is */
+                        option(always, [
+                            decoratePropertyWith(meta => 
+                                Field(meta.type as ReturnTypeFunc, {
+                                    nullable: meta.optional,
+                                    description: meta.description
+                                })
+                            )
+                        ])
                     ])
-                ])
-            ]),
-
-            ifMetadata(
-                matchesMetadata({ output }),
-                decorateClassWith(meta => GqlObjectType({
-                    description: meta.description,
-                    isAbstract: meta.abstract
-                })),
-                decorateClassWith(meta => GqlInputType({
-                    description: meta.description,
-                    isAbstract: meta.abstract
-                }))
-            ),
-        ]
-    )
-]);
+                ]),
+    
+                /** Tell the GraphQL system what type of object this is */
+                ifMetadata(
+                    matchesMetadata({ output }),
+                    decorateClassWith(meta => GqlObjectType({
+                        description: meta.description,
+                        isAbstract: meta.abstract
+                    })),
+                    decorateClassWith(meta => GqlInputType({
+                        description: meta.description,
+                        isAbstract: meta.abstract
+                    }))
+                ),
+            ]
+        )
+    ];
+}

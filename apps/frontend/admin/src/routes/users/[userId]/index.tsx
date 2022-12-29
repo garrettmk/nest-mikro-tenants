@@ -1,11 +1,9 @@
 import { $, component$, Resource, useContextProvider, useStore } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
-import { DataFields } from "@nest-mikro-tenants/core/common";
-import { User, UsersWhereOneInput, UserUpdateInput } from "@nest-mikro-tenants/core/domain";
+import { IUser, User, UsersWhereOneInput, UserUpdateInput } from "@nest-mikro-tenants/core/domain";
 import { deleteOneMutation, getQuery, GetVariables, updateOneMutation } from "@nest-mikro-tenants/frontend/common";
+import { Breadcrumbs, CancelButton, CardHeader, CardSection, CardTitle, ConfirmDeleteModal, DeleteButton, SaveButton, Toolbar } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { useMutation, useQueryResource } from "@nest-mikro-tenants/frontend/qwurql";
-import { Breadcrumbs, CancelButton, DeleteButton, SaveButton, CardHeader, CardTitle, CardSection, Toolbar, ConfirmDeleteModal } from "@nest-mikro-tenants/frontend/qwik-ui";
-import { UserUpdateForm } from "../../../components/forms/user-update-form";
 import { PageHeader } from "../../../components/header/page-header";
 import { PageTitle } from "../../../components/header/page-title";
 import { ErrorOverlay } from "../../../components/overlays/error-overlay";
@@ -15,6 +13,7 @@ import { useFormState } from "../../../hooks/use-form-state.hook";
 import { useNotify } from "../../../hooks/use-notify.hook";
 import { useObjectForm } from "../../../hooks/use-object-form.hook";
 import { useToggle } from "../../../hooks/use-toggle.hook";
+import { UserUpdateForm } from './user-update-form';
 
 /** Queries and mutations */
 export const getUserQuery$ = $(() => getQuery(User));
@@ -37,7 +36,7 @@ export default component$(() => {
 
 /** Main page component */
 export interface UserUpdatePageProps {
-    user: DataFields<User>
+    user: IUser
 }
 
 export const UserUpdatePage = component$((props: UserUpdatePageProps) => {

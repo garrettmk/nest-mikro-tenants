@@ -28,7 +28,7 @@ export function useLiveOperation<Data, Variables extends object>(
         : optionsOrQrl;
 
     const state = useLiveOperationState(options);
-    const result = useSignal<SimplifiedOperationResult<Data, Variables>>();
+    const result = useSignal<SimplifiedOperationResult<Data>>();
     const loading = useSignal(false);
 
     // Create the operation executor
