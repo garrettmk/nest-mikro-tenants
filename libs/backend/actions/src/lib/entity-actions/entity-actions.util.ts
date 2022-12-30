@@ -5,6 +5,7 @@ import {
   PropertyMetadata,
   getTypeInfo,
   BaseModelConstructor,
+  ClassMetadataManager,
 } from '@garrettmk/class-schema';
 import { TargetContext } from '@garrettmk/metadata-actions';
 import { Constructor, doesExtend, isConstructor } from '@garrettmk/ts-utils';
@@ -40,7 +41,12 @@ export function isEntityField(
   meta: PropertyMetadata
 ): meta is PropertyMetadata<BaseModelConstructor | BaseModelConstructor[]> {
   const { innerType } = getTypeInfo(meta.type);
-  return isConstructor(innerType) && doesExtend(innerType, BaseModel);
+  if (!isConstructor(innerType) || !ClassMetadataManager.hasMetadata(innerType))
+    return false;
+
+  const { entity } = ClassMetadataManager.getMetadata(innerType);
+
+  return !!entity;
 }
 
 /** Create and register an EntitySchema */

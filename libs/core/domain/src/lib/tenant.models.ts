@@ -24,9 +24,9 @@ export class Tenant extends BaseModel {
     @Property(() => Date, { default: () => new Date(), description: 'The datetime the model was last updated' })
     updatedAt!: Date;
 
-    // // Relations
-    // @Property(() => [User], { manyToMany, description: 'User\'s belonging to this tenant' })
-    // users?: User[];
+    // Relations
+    @Property(() => [User], { manyToMany, description: 'User\'s belonging to this tenant' })
+    users?: User[];
 }
 
 @Class({ input })

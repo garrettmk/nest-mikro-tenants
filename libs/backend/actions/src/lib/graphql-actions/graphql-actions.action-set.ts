@@ -6,11 +6,9 @@ import {
   decorateClassWith,
   decoratePropertyWith,
   hidden,
-  input,
-  not,
+  input, not,
   or,
-  output,
-  withPropertiesMetadata,
+  output, withPropertiesMetadata
 } from '@garrettmk/class-schema';
 import {
   always,
@@ -19,8 +17,7 @@ import {
   ifMetadata,
   matchesMetadata,
   MetadataActionSetClass,
-  MetadataSelector,
-  option,
+  MetadataSelector, option
 } from '@garrettmk/metadata-actions';
 import { Constructor } from '@garrettmk/ts-utils';
 import { Field, InputType as GqlInputType, ObjectType as GqlObjectType, ReturnTypeFunc } from '@nestjs/graphql';
@@ -51,16 +48,16 @@ export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constr
               ),
             ]),
 
-            /** For every other type, just use it as-is */
+            /** All other fields */
             option(always, [
-              decoratePropertyWith((meta) =>
+              decoratePropertyWith(meta => 
                 Field(meta.type as ReturnTypeFunc, {
                   nullable: meta.optional,
-                  description: meta.description,
+                  description: meta.description
                 })
-              ),
+              )
             ]),
-          ]),
+          ])
         ]),
 
         /** Tell the GraphQL system what type of object this is */

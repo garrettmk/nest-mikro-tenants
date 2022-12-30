@@ -89,15 +89,11 @@ export class EntityActions extends MetadataActionSetClass<ClassMetadata, Constru
                   comment: meta.description,
                   onCreate: meta.default,
                   reference:
-                    'oneToOne' in meta && meta.oneToOne
-                      ? '1:1'
-                      : 'oneToMany' in meta && meta.oneToMany
-                      ? '1:m'
-                      : 'manyToOne' in meta && meta.manyToOne
-                      ? 'm:1'
-                      : 'manyToMany' in meta && meta.manyToMany
-                      ? 'm:n'
-                      : undefined,
+                    'oneToOne' in meta && meta.oneToOne ? '1:1' :
+                    'oneToMany' in meta && meta.oneToMany ? '1:m' :
+                    'manyToOne' in meta && meta.manyToOne ? 'm:1' :
+                    'manyToMany' in meta && meta.manyToMany ? 'm:n' :
+                    undefined,
                 },
               });
             }),
