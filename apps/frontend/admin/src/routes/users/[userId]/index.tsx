@@ -1,7 +1,7 @@
 import { $, component$, Resource, useContextProvider, useStore } from "@builder.io/qwik";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
-import { IUser, User, UsersWhereOneInput, UserUpdateInput } from "@nest-mikro-tenants/core/domain";
-import { deleteOneMutation, getQuery, GetVariables, updateOneMutation } from "@nest-mikro-tenants/frontend/common";
+import { User, UsersWhereOneInput, UserUpdateInput } from "@nest-mikro-tenants/core/domain";
+import { deleteOneMutation, getQuery, GetVariables, updateOneMutation, UserUpdateFormData } from "@nest-mikro-tenants/frontend/common";
 import { Breadcrumbs, CancelButton, CardHeader, CardSection, CardTitle, ConfirmDeleteModal, DeleteButton, SaveButton, Toolbar } from "@nest-mikro-tenants/frontend/qwik-ui";
 import { useMutation, useQueryResource } from "@nest-mikro-tenants/frontend/qwurql";
 import { PageHeader } from "../../../components/header/page-header";
@@ -36,7 +36,7 @@ export default component$(() => {
 
 /** Main page component */
 export interface UserUpdatePageProps {
-    user: IUser
+    user: User
 }
 
 export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
@@ -46,8 +46,8 @@ export const UserUpdatePage = component$((props: UserUpdatePageProps) => {
     const goBack$ = $(() => setTimeout(() => { nav.path = '/users'; }, 1000));
     
     // Set up the form
-    const form = useFormState(() => UserUpdateInput.plainFromSync(user));
-    useObjectForm($(() => UserUpdateInput), form);
+    const form = useFormState(() => UserUpdateFormData.plainFromSync(user as unknown as UserUpdateFormData));
+    useObjectForm($(() => UserUpdateFormData), form);
     useContextProvider(FormStateContext, form);
 
     // Set up the update mutation

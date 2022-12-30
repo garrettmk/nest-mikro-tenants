@@ -6,3 +6,4 @@ export * from './lib/graphql/update-one.mutation';
 export * from './lib/graphql/delete-one.mutation';
 
 export * from './lib/objects/user-create-form-data';
+export * from './lib/objects/user-update-form-data';

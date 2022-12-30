@@ -23,23 +23,8 @@ import {
   option,
 } from '@garrettmk/metadata-actions';
 import { Constructor } from '@garrettmk/ts-utils';
-import { TenantStatus, UserStatus } from '@nest-mikro-tenants/core/domain';
-import {
-  Field,
-  InputType as GqlInputType,
-  ObjectType as GqlObjectType,
-  registerEnumType,
-  ReturnTypeFunc,
-} from '@nestjs/graphql';
+import { Field, InputType as GqlInputType, ObjectType as GqlObjectType, ReturnTypeFunc } from '@nestjs/graphql';
 import { isMappedTypeField, toGraphQlType } from './graphql-actions.util';
-
-registerEnumType(UserStatus, {
-  name: 'UserStatus',
-});
-
-registerEnumType(TenantStatus, {
-  name: 'TenantStatus',
-});
 
 export class GraphQLActions extends MetadataActionSetClass<ClassMetadata, Constructor>() {
   static manager = ClassMetadataManager;

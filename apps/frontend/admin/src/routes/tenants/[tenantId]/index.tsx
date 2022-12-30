@@ -52,6 +52,8 @@ export const TenantUpdatePage = component$((props: TenantUpdatePageProps) => {
     useObjectForm($(() => TenantUpdateInput), form);
     useContextProvider(FormStateContext, form);
 
+    console.log({ tenant, form });
+
     // Set up the update mutation
     const updateTenant = useMutation({
         operation$: updateTenantMutation$,

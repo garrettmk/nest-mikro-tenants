@@ -1,4 +1,5 @@
-import { BaseObjectActions, Class, Property, ValidationActions } from "@garrettmk/class-schema";
+import { Class, Property } from "@garrettmk/class-schema";
+import { ValidationActions } from "@nest-mikro-tenants/core/actions";
 import { MatchesProperty } from "@nest-mikro-tenants/core/common";
 import { UserCreateInput } from "@nest-mikro-tenants/core/domain";
 
@@ -10,4 +11,3 @@ export class UserCreateFormData extends UserCreateInput {
 }
 
 ValidationActions.applyActions(UserCreateFormData);
-BaseObjectActions.applyActions(UserCreateFormData);

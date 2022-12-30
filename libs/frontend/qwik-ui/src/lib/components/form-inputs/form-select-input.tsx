@@ -8,7 +8,7 @@ export type FormSelectInputProps = Omit<SelectInputProps, 'value' | 'errors' | '
 };
 
 export const FormSelectInput = component$((props: FormSelectInputProps) => {
-    const { name, options = [] } = props;
+    const { name, options = [], ...otherProps } = props;
     const state = useContext(FormStateContext);
     
     const formValue = name 
@@ -26,7 +26,7 @@ export const FormSelectInput = component$((props: FormSelectInputProps) => {
 
     return (
         <SelectInput
-            {...props}
+            {...otherProps}
             name={name}
             errors={errors}
             onChange$={handleChange$}
